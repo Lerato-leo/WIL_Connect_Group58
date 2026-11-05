@@ -36,7 +36,7 @@ Open the Maven tool window.
 Click Reload All Maven Projects.
 Allow Maven to download the project dependencies.
 
-7. Java SDK Configuration
+1. Java SDK Configuration
 
 Ensure Java 17 is configured.
 In IntelliJ:
@@ -47,6 +47,18 @@ Set Language Level to 17.
 Under Modules, ensure the module SDK is also JDK 17.
 The Java version must be consistent with the pom.xml configuration.
 
+OpenAPI specification location
+The main API specification is maintained at:
+    'src/main/resources/static/openapi/wil-connect.yaml'
+
+All developers should update this specification when introducing or changing API endpoints.
+The specification defines:
+1. API endpoints and HTTP methods.
+2. Request bodies.
+3. Response bodies.
+4. Data types and validation constraints.
+5. HTTP response codes.
+7. API descriptions and operation names.
 # WIL Connect Database
 
 This folder contains the database files for the WIL Connect and Sign-Off Portal.
