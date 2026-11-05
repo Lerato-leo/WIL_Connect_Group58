@@ -83,7 +83,7 @@ components:
       properties:
         userId:
           type: integer
-          format: int64
+          format: int32
 
         email:
           type: string

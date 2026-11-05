@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import wil_connect.enums.Role;
 
 @Setter
 @Getter
@@ -16,7 +17,7 @@ public class UserAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long userId;
+    private Integer  userId;
 
     @Column(nullable = false, unique = true, length = 100)
     private String email;
@@ -24,7 +25,7 @@ public class UserAccount {
     @Column(name = "password_hash", nullable = false)
     private String password;
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(nullable = false, length = 20)
-//    private Role role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role;
 }
