@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import wil_connect.enums.Role;
+import wil_connect.generated.model.RegisterRequest;
 import wil_connect.repository.UserAccountRepository;
 import wil_connect.entity.UserAccount;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,16 +22,16 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public UserAccount register(String email, String password) {
+    public UserAccount register (RegisterRequest registerRequest) {
 
-        if (userAccountRepository.existsByEmail(email)) {
+        if (userAccountRepository.existsByEmail(registerRequest.getEmail())) {
             throw new RuntimeException("Email already registered");
         }
 
         UserAccount user = new UserAccount();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setRole(Role.STUDENT);
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setRole(Role.fromString(registerRequest.getRole().toString()));
 
         return userAccountRepository.save(user);
     }
