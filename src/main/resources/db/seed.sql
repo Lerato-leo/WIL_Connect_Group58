@@ -26,13 +26,13 @@ DELETE FROM USER_ACCOUNT;
 -- Password for every account in this seed is: password
 -- ------------------------------------------------------------
 INSERT INTO USER_ACCOUNT (user_id, email, password_hash, role) VALUES
-(1,'coordinator@richfield.co.za','$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG','Coordinator'),
-(2,'john.smith@richfield.co.za','$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG','Student'),
-(3,'sarah.jones@richfield.co.za','$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG','Student'),
-(4,'michael.brown@richfield.co.za','$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG','Supervisor'),
-(5,'linda.davis@richfield.co.za','$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG','Supervisor'),
-(6,'hr.nexus@richfield.co.za','$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG','Employer'),
-(7,'hr.brightworks@richfield.co.za','$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG','Employer');
+(1,'coordinator@richfield.co.za','$2a$10$n.NJWnQX8FzJIP5C9AkNxOsEQpI7yoTFHfa4ZGGZr8MBQ4nYsFAIa','COORDINATOR'),
+(2,'john.smith@richfield.co.za','$2a$10$n.NJWnQX8FzJIP5C9AkNxOsEQpI7yoTFHfa4ZGGZr8MBQ4nYsFAIa','STUDENT'),
+(3,'sarah.jones@richfield.co.za','$2a$10$n.NJWnQX8FzJIP5C9AkNxOsEQpI7yoTFHfa4ZGGZr8MBQ4nYsFAIa','STUDENT'),
+(4,'michael.brown@richfield.co.za','$2a$10$n.NJWnQX8FzJIP5C9AkNxOsEQpI7yoTFHfa4ZGGZr8MBQ4nYsFAIa','SUPERVISOR'),
+(5,'linda.davis@richfield.co.za','$2a$10$n.NJWnQX8FzJIP5C9AkNxOsEQpI7yoTFHfa4ZGGZr8MBQ4nYsFAIa','SUPERVISOR'),
+(6,'hr.nexus@richfield.co.za','$2a$10$n.NJWnQX8FzJIP5C9AkNxOsEQpI7yoTFHfa4ZGGZr8MBQ4nYsFAIa','EMPLOYER'),
+(7,'hr.brightworks@richfield.co.za','$2a$10$n.NJWnQX8FzJIP5C9AkNxOsEQpI7yoTFHfa4ZGGZr8MBQ4nYsFAIa','EMPLOYER');
 
 -- ------------------------------------------------------------
 -- EMPLOYER

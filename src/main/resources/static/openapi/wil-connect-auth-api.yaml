@@ -15,6 +15,11 @@ tags:
     description: User registration and authentication
 
 paths:
+
+  # ==========================================================
+  # REGISTRATION
+  # ==========================================================
+
   /api/auth/register:
     post:
       tags:
@@ -30,7 +35,7 @@ paths:
               $ref: '#/components/schemas/RegisterRequest'
 
       responses:
-        '200':
+        '201':
           description: Account registered successfully
           content:
             application/json:
@@ -51,8 +56,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+
+  # ==========================================================
+  # LOGIN
+  # ==========================================================
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      operationId: loginUser
+      summary: Authenticate a user
+      description: Authenticates a registered user using their email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+        '400':
+          description: Invalid login request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '401':
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
+    # ========================================================
+    # REGISTRATION MODELS
+    # ========================================================
 
     RegisterRequest:
       type: object
@@ -102,6 +151,67 @@ components:
           type: string
           example: Registration successful
 
+
+    # ========================================================
+    # LOGIN MODELS
+    # ========================================================
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          example: john@gmail.com
+
+        password:
+          type: string
+          format: password
+          example: SecurePass123!
+
+    LoginResponse:
+      type: object
+      required:
+        - userId
+        - email
+        - role
+        - authenticated
+        - message
+      properties:
+        userId:
+          type: integer
+          format: int32
+
+        email:
+          type: string
+          format: email
+
+        role:
+          type: string
+          enum:
+            - STUDENT
+            - SUPERVISOR
+            - EMPLOYER
+            - COORDINATOR
+          example: STUDENT
+
+        authenticated:
+          type: boolean
+          example: true
+
+        message:
+          type: string
+          example: Login successful
+
+
+    # ========================================================
+    # ERROR MODEL
+    # ========================================================
+
     ErrorResponse:
       type: object
       required:
@@ -109,4 +219,4 @@ components:
       properties:
         message:
           type: string
-          example: Email address already exists
+          example: Invalid email or password
