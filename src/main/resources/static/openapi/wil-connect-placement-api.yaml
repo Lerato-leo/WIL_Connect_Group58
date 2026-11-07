@@ -1,0 +1,656 @@
+
+openapi: 3.0.3
+
+info:
+  title: WIL Connect Placement API
+  description: >
+    API for employer discovery, student placement requests,
+    employer decisions, meeting requests and placement management.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Employer Search
+    description: Search for approved employers.
+  - name: Student Placement Requests
+    description: Student placement request operations.
+  - name: Employer Placement Requests
+    description: Employer review and management of placement requests.
+  - name: Placements
+    description: View and manage confirmed placements.
+
+security:
+  - basicAuth: []
+
+paths:
+
+  # ==========================================================
+  # STUDENT: SEARCH APPROVED EMPLOYERS
+  # ==========================================================
+
+  /api/students/employers:
+    get:
+      tags:
+        - Employer Search
+      summary: Search approved employers
+      description: >
+        Returns approved employers only. Students can optionally
+        search by employer name.
+      operationId: searchApprovedEmployers
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: Employer name to search for.
+          schema:
+            type: string
+            maxLength: 100
+          example: Nexus
+      responses:
+        '200':
+          description: Employers retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmployerSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================================
+  # STUDENT: SUBMIT PLACEMENT REQUEST
+  # ==========================================================
+
+  /api/students/placement-requests:
+    post:
+      tags:
+        - Student Placement Requests
+      summary: Submit a placement request
+      description: >
+        Creates a placement request for the authenticated student.
+        The student identity is obtained from the authenticated
+        account and must not be supplied by the frontend.
+        The employer must have Approved status.
+      operationId: createPlacementRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlacementRequest'
+      responses:
+        '201':
+          description: Placement request submitted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacementRequestResponse'
+        '400':
+          description: Invalid request or duplicate active request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Employer not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflicting placement request or existing placement.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Student Placement Requests
+      summary: Get my placement requests
+      description: >
+        Returns all placement requests belonging to the authenticated student.
+      operationId: getMyPlacementRequests
+      responses:
+        '200':
+          description: Placement requests retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlacementRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ==========================================================
+  # EMPLOYER: VIEW INCOMING REQUESTS
+  # ==========================================================
+
+  /api/employers/placement-requests:
+    get:
+      tags:
+        - Employer Placement Requests
+      summary: Get incoming placement requests
+      description: >
+        Returns placement requests belonging to the authenticated employer.
+        An optional status filter can be used.
+      operationId: getEmployerPlacementRequests
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Filter requests by status.
+          schema:
+            type: string
+            enum:
+              - Pending
+              - Meeting Requested
+              - Accepted
+              - Rejected
+      responses:
+        '200':
+          description: Employer placement requests retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmployerPlacementRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ==========================================================
+  # EMPLOYER: ACCEPT PLACEMENT REQUEST
+  # ==========================================================
+
+  /api/employers/placement-requests/{requestId}/accept:
+    put:
+      tags:
+        - Employer Placement Requests
+      summary: Accept a placement request
+      description: >
+        Accepts a student's placement request and creates a placement.
+        The employer must own the request. The selected supervisor must
+        belong to that employer. Request status and placement creation
+        must be handled in one database transaction.
+      operationId: acceptPlacementRequest
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptPlacementRequest'
+      responses:
+        '200':
+          description: Placement request accepted and placement created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacementResponse'
+        '400':
+          description: Invalid supervisor or placement dates.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Request or supervisor not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Request cannot be accepted or placement already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================================================
+  # EMPLOYER: REJECT PLACEMENT REQUEST
+  # ==========================================================
+
+  /api/employers/placement-requests/{requestId}/reject:
+    put:
+      tags:
+        - Employer Placement Requests
+      summary: Reject a placement request
+      description: >
+        Rejects a student's placement request.
+        The employer must own the request.
+      operationId: rejectPlacementRequest
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      responses:
+        '200':
+          description: Placement request rejected successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacementRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Placement request not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Placement request cannot be rejected in its current state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================================================
+  # EMPLOYER: REQUEST A MEETING
+  # ==========================================================
+
+  /api/employers/placement-requests/{requestId}/meeting:
+    put:
+      tags:
+        - Employer Placement Requests
+      summary: Request a meeting with a student
+      description: >
+        Changes the placement request status to Meeting Requested.
+        The message should also be saved as a notification for the student.
+      operationId: requestMeeting
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingRequest'
+      responses:
+        '200':
+          description: Meeting request sent successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacementRequestResponse'
+        '400':
+          description: Invalid meeting message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Placement request not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Placement request cannot be updated in its current state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================================================
+  # STUDENT: VIEW PLACEMENTS
+  # ==========================================================
+
+  /api/students/placements:
+    get:
+      tags:
+        - Placements
+      summary: Get my placements
+      description: >
+        Returns all placements belonging to the authenticated student.
+      operationId: getMyPlacements
+      responses:
+        '200':
+          description: Student placements retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlacementResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ==========================================================
+  # EMPLOYER: VIEW PLACEMENTS
+  # ==========================================================
+
+  /api/employers/placements:
+    get:
+      tags:
+        - Placements
+      summary: Get employer placements
+      description: >
+        Returns placements belonging to the authenticated employer.
+      operationId: getEmployerPlacements
+      responses:
+        '200':
+          description: Employer placements retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlacementResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+# ============================================================
+# COMPONENTS
+# ============================================================
+
+components:
+
+  # ----------------------------------------------------------
+  # SECURITY
+  # ----------------------------------------------------------
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: HTTP Basic authentication using account email and password.
+
+  # ----------------------------------------------------------
+  # COMMON PARAMETERS
+  # ----------------------------------------------------------
+
+  parameters:
+    RequestId:
+      name: requestId
+      in: path
+      required: true
+      description: Unique placement request ID.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+      example: 1
+
+  # ----------------------------------------------------------
+  # REQUEST MODELS
+  # ----------------------------------------------------------
+
+  schemas:
+
+    CreatePlacementRequest:
+      type: object
+      required:
+        - employerId
+      properties:
+        employerId:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1
+
+    AcceptPlacementRequest:
+      type: object
+      required:
+        - supervisorId
+        - startDate
+        - endDate
+      properties:
+        supervisorId:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1
+        startDate:
+          type: string
+          format: date
+          example: '2026-11-10'
+        endDate:
+          type: string
+          format: date
+          example: '2027-02-10'
+
+    MeetingRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          minLength: 1
+          maxLength: 500
+          example: Please attend an interview on 12 November at 10:00.
+
+    # --------------------------------------------------------
+    # EMPLOYER RESPONSE
+    # --------------------------------------------------------
+
+    EmployerSummary:
+      type: object
+      required:
+        - employerId
+        - employerName
+        - address
+        - status
+      properties:
+        employerId:
+          type: integer
+          format: int32
+          example: 1
+        employerName:
+          type: string
+          example: Nexus Tech Solutions
+        address:
+          type: string
+          example: 12 Rivonia Road, Sandton, Johannesburg
+        contactEmail:
+          type: string
+          format: email
+          example: hr@nexustech.co.za
+        contactNumber:
+          type: string
+          example: '0115550100'
+        status:
+          type: string
+          enum:
+            - Approved
+          example: Approved
+
+    # --------------------------------------------------------
+    # PLACEMENT REQUEST RESPONSES
+    # --------------------------------------------------------
+
+    PlacementRequestResponse:
+      type: object
+      required:
+        - requestId
+        - employerId
+        - employerName
+        - requestDate
+        - status
+      properties:
+        requestId:
+          type: integer
+          format: int32
+          example: 1
+        employerId:
+          type: integer
+          format: int32
+          example: 1
+        employerName:
+          type: string
+          example: Nexus Tech Solutions
+        requestDate:
+          type: string
+          format: date
+          example: '2026-08-10'
+        status:
+          type: string
+          enum:
+            - Pending
+            - Meeting Requested
+            - Accepted
+            - Rejected
+          example: Pending
+
+    EmployerPlacementRequestResponse:
+      allOf:
+        - $ref: '#/components/schemas/PlacementRequestResponse'
+        - type: object
+          required:
+            - studentId
+            - studentNumber
+            - studentFirstName
+            - studentLastName
+          properties:
+            studentId:
+              type: integer
+              format: int32
+              example: 2
+            studentNumber:
+              type: string
+              example: '20240187'
+            studentFirstName:
+              type: string
+              example: Sarah
+            studentLastName:
+              type: string
+              example: Jones
+
+    # --------------------------------------------------------
+    # PLACEMENT RESPONSE
+    # --------------------------------------------------------
+
+    PlacementResponse:
+      type: object
+      required:
+        - placementId
+        - studentId
+        - studentName
+        - employerId
+        - employerName
+        - supervisorId
+        - supervisorName
+        - startDate
+        - endDate
+        - status
+      properties:
+        placementId:
+          type: integer
+          format: int32
+          example: 1
+        studentId:
+          type: integer
+          format: int32
+          example: 1
+        studentName:
+          type: string
+          example: John Smith
+        studentNumber:
+          type: string
+          example: '20240123'
+        employerId:
+          type: integer
+          format: int32
+          example: 1
+        employerName:
+          type: string
+          example: Nexus Tech Solutions
+        supervisorId:
+          type: integer
+          format: int32
+          example: 1
+        supervisorName:
+          type: string
+          example: Michael Brown
+        startDate:
+          type: string
+          format: date
+          example: '2026-09-01'
+        endDate:
+          type: string
+          format: date
+          example: '2026-11-30'
+        status:
+          type: string
+          enum:
+            - Pending
+            - Active
+            - Completed
+            - Cancelled
+          example: Active
+
+    # --------------------------------------------------------
+    # ERROR RESPONSE
+    # --------------------------------------------------------
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Placement request not found.
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-11-06T14:30:00'
+
+  # ----------------------------------------------------------
+  # COMMON RESPONSES
+  # ----------------------------------------------------------
+
+  responses:
+
+    Unauthorized:
+      description: Authentication is required or credentials are invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: The authenticated user does not have permission.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: An unexpected server error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

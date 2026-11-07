@@ -140,6 +140,40 @@
 							</configOptions>
 						</configuration>
 					</execution>
+					<execution>
+						<id>generate-placement-api</id>
+
+						<goals>
+							<goal>generate</goal>
+						</goals>
+
+						<configuration>
+							<inputSpec>
+								${project.basedir}/src/main/resources/static/openapi/wil-connect-placement-api.yaml
+							</inputSpec>
+
+							<generatorName>spring</generatorName>
+
+							<apiPackage>wil_connect.generated.placement.api</apiPackage>
+							<modelPackage>wil_connect.generated.placement.model</modelPackage>
+							<invokerPackage>wil_connect.generated.placement</invokerPackage>
+
+							<output>
+								${project.build.directory}/generated-sources/openapi/placement
+							</output>
+
+							<addCompileSourceRoot>true</addCompileSourceRoot>
+
+							<configOptions>
+								<sourceFolder>src/main/java</sourceFolder>
+								<interfaceOnly>true</interfaceOnly>
+								<useSpringBoot3>true</useSpringBoot3>
+								<useTags>true</useTags>
+								<useBeanValidation>true</useBeanValidation>
+								<skipDefaultInterface>true</skipDefaultInterface>
+							</configOptions>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 
