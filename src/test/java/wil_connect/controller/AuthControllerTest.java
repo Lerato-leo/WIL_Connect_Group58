@@ -36,24 +36,25 @@ class AuthControllerTest {
 
         String requestBody = """
                 {
-                    "email": "teststudent@wilconnect.co.za",
-                    "password": "password"
+                    "email": "teststudent2@wilconnect.co.za",
+                    "password": "password",
+                    "role": "STUDENT"
                 }
                 """;
 
         mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(requestBody))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value("teststudent@wilconnect.co.za"))
+                .andExpect(jsonPath("$.email").value("teststudent2@wilconnect.co.za"))
                 .andExpect(jsonPath("$.role").value("STUDENT"))
                 .andExpect(jsonPath("$.userId").isNumber());
         UserAccount user = userAccountRepository
-                .findByEmail("teststudent@wilconnect.co.za")
+                .findByEmail("teststudent2@wilconnect.co.za")
                 .orElseThrow();
 
-        assertEquals("teststudent@wilconnect.co.za", user.getEmail());
+        assertEquals("teststudent2@wilconnect.co.za", user.getEmail());
         assertEquals("STUDENT", user.getRole().name());
 
-        assertTrue(passwordEncoder.matches("password!", user.getPassword()));
+        assertTrue(passwordEncoder.matches("password", user.getPassword()));
     }
 
     // TEST 2: Successful login

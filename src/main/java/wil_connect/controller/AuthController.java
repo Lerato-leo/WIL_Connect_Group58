@@ -37,7 +37,7 @@ public class AuthController implements AuthenticationApi {
 
     @Override
     public ResponseEntity<RegisterResponse> registerUser(RegisterRequest registerRequest) {
-        UserAccount user = authService.register(registerRequest.getEmail(), registerRequest.getPassword());
+        UserAccount user = authService.register(registerRequest);
         RegisterResponse response = new RegisterResponse();
 
         response.setUserId(user.getUserId());

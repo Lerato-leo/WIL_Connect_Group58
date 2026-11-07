@@ -108,6 +108,7 @@ components:
       required:
         - email
         - password
+        - role
       properties:
         email:
           type: string
@@ -121,6 +122,15 @@ components:
           minLength: 8
           maxLength: 72
           example: SecurePass123!
+
+        role:
+          type: string
+          enum:
+            - STUDENT
+            - SUPERVISOR
+            - EMPLOYER
+            - COORDINATOR
+          example: STUDENT
 
     RegisterResponse:
       type: object
