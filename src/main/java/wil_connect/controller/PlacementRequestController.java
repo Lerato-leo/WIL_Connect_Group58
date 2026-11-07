@@ -169,7 +169,8 @@ public class PlacementRequestController implements StudentPlacementRequestsApi, 
         response.setEmployerId(request.getEmployer().getEmployerId());
         response.setEmployerName(request.getEmployer().getEmployerName());
         response.setRequestDate(request.getRequestDate());
-        response.setStatus(PlacementRequestResponse.StatusEnum.valueOf(request.getStatus()));
+        response.setStatus(PlacementRequestResponse.StatusEnum.valueOf(
+                request.getStatus().toUpperCase(java.util.Locale.ROOT).replace(' ', '_')));
         return response;
     }
 
