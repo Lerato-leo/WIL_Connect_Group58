@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,15 +29,7 @@ public class CoordinatorController {
 
     @GetMapping("/student-progress")
     public ResponseEntity<List<StudentProgress>> getStudentProgress(Principal principal) {
-        Boolean coordinator = jdbc.queryForObject("""
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM USER_ACCOUNT
-                    WHERE email = ? AND UPPER(role) = 'COORDINATOR'
-                )
-                """, Boolean.class, principal.getName());
-
-        if (!Boolean.TRUE.equals(coordinator)) {
+        if (!isCoordinator(principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -70,6 +64,75 @@ public class CoordinatorController {
         return ResponseEntity.ok(progress);
     }
 
+    @GetMapping("/employers")
+    public ResponseEntity<List<EmployerSummary>> getEmployers(Principal principal) {
+        if (!isCoordinator(principal)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<EmployerSummary> employers = jdbc.query("""
+                SELECT employer_id, employer_name, status
+                FROM EMPLOYER
+                ORDER BY employer_name, employer_id
+                """, (row, index) -> new EmployerSummary(
+                row.getInt("employer_id"),
+                row.getString("employer_name"),
+                row.getString("status")));
+
+        return ResponseEntity.ok(employers);
+    }
+
+    @PatchMapping("/employers/{employerId}/approve")
+    public ResponseEntity<Void> approveEmployer(
+            @PathVariable("employerId") int employerId, Principal principal) {
+        return changeEmployerStatus(principal, employerId, "Pending", "Approved");
+    }
+
+    @PatchMapping("/employers/{employerId}/deactivate")
+    public ResponseEntity<Void> deactivateEmployer(
+            @PathVariable("employerId") int employerId, Principal principal) {
+        return changeEmployerStatus(principal, employerId, "Approved", "Inactive");
+    }
+
+    private ResponseEntity<Void> changeEmployerStatus(
+            Principal principal, int employerId, String expectedStatus, String newStatus) {
+        if (!isCoordinator(principal)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        int updated = jdbc.update("""
+                UPDATE EMPLOYER
+                SET status = ?
+                WHERE employer_id = ? AND UPPER(status) = UPPER(?)
+                """, newStatus, employerId, expectedStatus);
+
+        if (updated == 1) {
+            return ResponseEntity.noContent().build();
+        }
+
+        Boolean exists = jdbc.queryForObject("""
+                SELECT EXISTS (
+                    SELECT 1 FROM EMPLOYER WHERE employer_id = ?
+                )
+                """, Boolean.class, employerId);
+
+        return ResponseEntity.status(
+                        Boolean.TRUE.equals(exists) ? HttpStatus.CONFLICT : HttpStatus.NOT_FOUND)
+                .build();
+    }
+
+    private boolean isCoordinator(Principal principal) {
+        Boolean coordinator = jdbc.queryForObject("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM USER_ACCOUNT
+                    WHERE email = ? AND UPPER(role) = 'COORDINATOR'
+                )
+                """, Boolean.class, principal.getName());
+
+        return Boolean.TRUE.equals(coordinator);
+    }
+
     private record PlacementDetails(
             int placementId,
             String studentNumber,
@@ -85,5 +148,8 @@ public class CoordinatorController {
             String employerName,
             String supervisorName,
             AttendanceProgress attendance) {
+    }
+
+    public record EmployerSummary(int employerId, String employerName, String status) {
     }
 }
