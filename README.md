@@ -137,3 +137,7 @@ Add placeholder files using these exact names:
 2026-10-27_test_report.pdf
 2026-10-29_site_photo.jpg
 2026-10-29_timesheet.pdf
+
+## Project structure
+
+src/ for the Spring Boot backend, frontend/ for the HTML, CSS and JavaScript pages, docs/ for the documentation and screenshots.
