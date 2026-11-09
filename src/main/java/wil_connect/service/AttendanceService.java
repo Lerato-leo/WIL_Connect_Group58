@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AttendanceService {
 
-    private static final BigDecimal REQUIRED_HOURS = BigDecimal.valueOf(150);
+    static final BigDecimal REQUIRED_HOURS = BigDecimal.valueOf(150);
     private final JdbcTemplate jdbc;
 
     public AttendanceService(JdbcTemplate jdbc) {
