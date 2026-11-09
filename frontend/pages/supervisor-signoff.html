@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review daily log · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/supervisor-signoff.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <!-- Supervisor review and sign off screen, Figure 4.7.4 and Table 4.7.9 -->
+    <main class="main" id="main" tabindex="-1">
+      <div class="page-head">
+        <div>
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="supervisor-pending.html#pending">Pending Sign Offs</a><span>/</span><span>Review log</span></nav>
+          <h1>Review daily log <span id="title-pill"></span></h1>
+          <p>Check the work and the proof, then sign off or reject.</p>
+        </div>
+      </div>
+
+      <div class="grid-main-side">
+        <!-- Left: the log, its proof and its sign off history -->
+        <section class="card" aria-label="The log">
+          <div id="detail"></div>
+        </section>
+
+        <!-- Right: the decision -->
+        <section class="card" aria-labelledby="decision-title">
+          <h2 id="decision-title" style="margin-bottom:14px">Your decision</h2>
+          <div id="decision-closed" class="hidden"></div>
+
+          <form id="decision-form" novalidate>
+            <div data-form-alert style="margin-bottom:12px"></div>
+            <fieldset style="border:0;padding:0;margin:0">
+              <legend class="visually-hidden">Decision</legend>
+              <div class="choice">
+                <label><input type="radio" name="decision" value="Signed" checked>Sign off</label>
+                <label><input type="radio" name="decision" value="Rejected">Reject</label>
+              </div>
+            </fieldset>
+
+            <!-- Sign off: signature or verification PIN -->
+            <div id="signoff-part">
+              <fieldset style="border:0;padding:0;margin:16px 0 0">
+                <legend class="label" style="margin-bottom:8px">Method</legend>
+                <div class="segmented">
+                  <label><input type="radio" name="method" value="Signature" checked>Signature</label>
+                  <label><input type="radio" name="method" value="PIN">Verification PIN</label>
+                </div>
+              </fieldset>
+
+              <div class="field" id="signature-field" style="margin-top:16px">
+                <div class="field-label"><span class="label" id="signature-label">Sign in the box</span><button type="button" class="link-btn" id="clear-signature">Clear</button></div>
+                <div class="signature-wrap">
+                  <canvas class="signature-pad" id="signature" aria-labelledby="signature-label" aria-describedby="signature-help"></canvas>
+                  <span class="signature-hint">Use a finger or the mouse</span>
+                </div>
+                <span class="hint" id="signature-help">If you cannot draw, choose Verification PIN.</span>
+              </div>
+
+              <div class="field hidden" id="pin-field" style="margin-top:16px">
+                <label for="pin">Verification PIN</label>
+                <input class="input num" id="pin" name="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="4 to 6 digits" style="max-width:200px">
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-block" id="approve-button" disabled>Sign Off</button>
+              </div>
+            </div>
+
+            <!-- Reject: a reason is required -->
+            <div id="reject-part" class="hidden">
+              <div class="field" style="margin-top:16px">
+                <div class="field-label"><label for="comment">Reason</label><output id="comment-count" for="comment"></output></div>
+                <textarea class="textarea" id="comment" name="comment" maxlength="300" placeholder="Tell the student what to fix, for example: attach the timesheet for this day."></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-danger btn-block" id="reject-button">Reject with a reason</button>
+              </div>
+            </div>
+
+            <p class="small muted" style="margin-top:16px">The student can correct a signed log for 24 hours. A correction comes back to you to sign again.</p>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

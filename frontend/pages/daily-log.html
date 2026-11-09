@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Log · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/daily-log.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <!-- Daily duty log screen, Figure 4.7.3 and Table 4.7.8 -->
+    <main class="main" id="main" tabindex="-1">
+      <div class="page-head">
+        <div>
+          <nav class="crumbs" aria-label="Breadcrumb"><a href="daily-log.html">Daily Log</a><span>/</span><span id="crumb">New log</span></nav>
+          <h1 id="form-title">Log today's duty</h1>
+          <p id="form-sub">One log for each day. Your supervisor is told as soon as you submit.</p>
+        </div>
+      </div>
+
+      <div class="grid-main-side">
+        <section class="card" aria-labelledby="form-title">
+          <form id="log-form" novalidate>
+            <div data-form-alert style="margin-bottom:16px"></div>
+            <div class="form-grid">
+              <div class="field">
+                <div class="field-label"><label for="logDate">Date</label><span class="tag">Required</span></div>
+                <input class="input" type="date" id="logDate" name="logDate" required>
+                <span class="hint">Inside your placement dates. Not in the future.</span>
+              </div>
+              <div class="field">
+                <div class="field-label"><label for="hoursWorked">Hours worked</label><span class="tag">Required</span></div>
+                <div class="input-unit">
+                  <input class="input num" type="number" id="hoursWorked" name="hoursWorked" min="0.5" max="12" step="0.5" inputmode="decimal" required>
+                  <span>hours</span>
+                </div>
+                <span class="hint">0.5 to 12, in steps of 0.5.</span>
+              </div>
+              <div class="field field-full">
+                <div class="field-label"><label for="taskDescription">Task done</label><output id="task-count" for="taskDescription"></output></div>
+                <textarea class="textarea" id="taskDescription" name="taskDescription" maxlength="1000" placeholder="What did you work on today?" required></textarea>
+              </div>
+              <div class="field field-full">
+                <div class="field-label"><label for="skillsLearnt">Skills learnt</label><output id="skills-count" for="skillsLearnt"></output></div>
+                <textarea class="textarea" id="skillsLearnt" name="skillsLearnt" maxlength="500" placeholder="What did you learn or practise?" style="min-height:72px"></textarea>
+              </div>
+              <div class="field field-full">
+                <div class="field-label"><span class="label" id="proof-label">Proof of work</span><output id="file-count"></output></div>
+                <div class="attach">
+                  <label class="btn btn-sm" for="proof">Attach proof</label>
+                  <input class="visually-hidden" type="file" id="proof" name="proof" multiple accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" aria-labelledby="proof-label" aria-describedby="proof-hint">
+                  <span class="hint" id="proof-hint">JPG, PNG or PDF. Up to 3 files, 5 MB each.</span>
+                </div>
+                <div class="chips" id="chips"></div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="save-button">Submit log</button>
+              <button type="button" class="btn" id="cancel-button">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <div class="stack">
+          <section class="card" aria-labelledby="placement-title">
+            <h2 id="placement-title" style="margin-bottom:12px">Your placement</h2>
+            <div id="placement"></div>
+          </section>
+          <section class="card" aria-labelledby="progress-title">
+            <h2 id="progress-title" style="margin-bottom:8px">Progress</h2>
+            <div id="progress"></div>
+          </section>
+          <section class="card" aria-labelledby="rules-title">
+            <h2 id="rules-title" style="margin-bottom:8px">Before you submit</h2>
+            <p class="small muted">A signed day can still be corrected for 24 hours, then it is locked. A rejected log can be corrected and sent again.</p>
+          </section>
+        </div>
+      </div>
+
+      <!-- My Logs: every log with its status and the supervisor's comment -->
+      <section class="card" id="logs" aria-labelledby="logs-title" style="margin-top:20px;scroll-margin-top:80px">
+        <div class="card-head">
+          <div>
+            <h2 id="logs-title">My Logs</h2>
+            <p>Newest first. A signed log can be corrected for 24 hours after sign off.</p>
+          </div>
+        </div>
+        <div id="log-list"></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

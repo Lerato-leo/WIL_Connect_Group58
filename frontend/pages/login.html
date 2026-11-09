@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/pages/login.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#login-form">Skip to the login form</a>
+  <!-- Login screen, Figure 4.7.2 -->
+  <div class="auth">
+    <header class="auth-top">
+      <span class="brand" id="brand"><span class="brand-text"><span class="brand-name">WIL <span class="brand-accent">Connect</span></span><span class="brand-tag">Sign off portal</span></span></span>
+      <span class="row small muted">New here? <a class="btn btn-light btn-sm" href="register.html">Create an account</a></span>
+    </header>
+
+    <main class="auth-body">
+      <section aria-labelledby="intro-title">
+        <h1 id="intro-title">Log your work.<br>Get it signed.</h1>
+        <p class="lead">WIL Connect keeps your daily duty logs, proof of work and supervisor sign off in one place.</p>
+        <div class="role-tags" aria-label="Who uses WIL Connect">
+          <span>Students</span><span>Supervisors</span><span>Employers</span><span>Coordinators</span>
+        </div>
+      </section>
+
+      <form class="card auth-card" id="login-form" novalidate>
+        <h2>Log in</h2>
+        <p class="muted small" style="margin:4px 0 20px">You will see the dashboard for your role.</p>
+        <div data-form-alert style="margin-bottom:16px"></div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input class="input" id="email" name="email" type="email" autocomplete="username" placeholder="name@richfield.co.za" maxlength="100" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
+            <button type="button" class="btn btn-ghost btn-sm password-toggle" id="toggle-password" aria-controls="password" aria-pressed="false">Show</button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-block" id="login-button">Log in</button>
+        </div>
+        <p class="small muted" style="margin-top:14px;text-align:center">No account yet? <a href="register.html">Create one</a></p>
+
+        <!-- Test accounts from the README. Shown only while fake data is on. -->
+        <div class="demo-box hidden" id="demo-box">
+          <strong>Test accounts</strong>
+          <p class="muted small">All use the password "password". Pick one to fill the form.</p>
+          <ul>
+            <li><button type="button" data-email="john.smith@richfield.co.za">John Smith <span>Student</span></button></li>
+            <li><button type="button" data-email="michael.brown@richfield.co.za">Michael Brown <span>Supervisor, PIN 1234</span></button></li>
+            <li><button type="button" data-email="hr.nexus@richfield.co.za">Nexus Tech Solutions <span>Employer</span></button></li>
+            <li><button type="button" data-email="coordinator@richfield.co.za">Rene Maseko <span>Coordinator</span></button></li>
+          </ul>
+        </div>
+      </form>
+    </main>
+
+    <footer class="auth-foot">WIL Connect will never ask for your password by email.</footer>
+  </div>
+</body>
+</html>

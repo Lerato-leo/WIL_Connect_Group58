@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student progress · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/coordinator-dashboard.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <!-- Coordinator dashboard, Figure 4.7.6 and Table 4.7.13 -->
+    <main class="main" id="main" tabindex="-1">
+      <div class="page-head">
+        <div>
+          <h1>Student progress</h1>
+          <p>Hours are counted from signed logs only.</p>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div class="card"><strong id="fact-students">0</strong><span>Students on placement</span></div>
+        <div class="card"><strong id="fact-done">0</strong><span>Students complete</span></div>
+        <div class="card"><strong id="fact-waiting">0</strong><span>Logs waiting more than 3 days</span></div>
+        <div class="card"><strong id="fact-employers">0</strong><span>Employers waiting for approval</span></div>
+      </div>
+
+      <!-- Students and Progress opens this table -->
+      <section class="card" id="students" aria-labelledby="students-title" style="scroll-margin-top:80px">
+        <h2 id="students-title" class="visually-hidden">Students and Progress</h2>
+        <form class="toolbar" id="filter-form" role="search" novalidate>
+          <div class="field" style="flex:1;max-width:320px">
+            <label class="visually-hidden" for="filter">Search students by name or student number</label>
+            <input class="input" id="filter" type="search" placeholder="Search students" maxlength="60" autocomplete="off">
+          </div>
+          <label class="visually-hidden" for="status">Status</label>
+          <select class="select" id="status">
+            <option value="">All statuses</option>
+            <option value="IN PROGRESS">In progress</option>
+            <option value="COMPLETE">Complete</option>
+          </select>
+        </form>
+        <div id="table"></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

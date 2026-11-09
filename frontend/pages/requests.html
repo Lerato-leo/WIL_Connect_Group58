@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Requests · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/requests.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <main class="main" id="main" tabindex="-1">
+      <div class="page-head">
+        <div>
+          <h1>My Requests</h1>
+          <p>Every placement request you have sent and the employer's answer.</p>
+        </div>
+        <a class="btn btn-primary" href="employers.html">Find Employers</a>
+      </div>
+
+      <section class="card" aria-labelledby="requests-title">
+        <div class="card-head"><h2 id="requests-title">Placement requests</h2></div>
+        <div id="requests"></div>
+      </section>
+
+      <section class="card" aria-labelledby="placements-title">
+        <div class="card-head"><h2 id="placements-title">My placement</h2></div>
+        <div id="placements"></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

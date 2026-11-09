@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign Off Audit Log · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/coordinator-audit.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <main class="main" id="main" tabindex="-1">
+      <!-- Sign Off Audit Log: read only list of every sign off (NFR6, Table 4.7.13) -->
+      <div class="page-head">
+        <div>
+          <h1>Sign Off Audit Log</h1>
+          <p>Every supervisor sign off, newest first. Sign off records are never changed or deleted.</p>
+        </div>
+      </div>
+      <section class="card" aria-label="Sign offs">
+        <form class="toolbar" id="filter-form" role="search" novalidate>
+          <div class="field" style="flex:1;max-width:320px">
+            <label class="visually-hidden" for="filter">Search by student or supervisor</label>
+            <input class="input" id="filter" type="search" placeholder="Search by student or supervisor" maxlength="60" autocomplete="off">
+          </div>
+          <label class="visually-hidden" for="method">Method</label>
+          <select class="select" id="method"><option value="">All methods</option><option>PIN</option><option>Signature</option></select>
+        </form>
+        <div id="table"></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
