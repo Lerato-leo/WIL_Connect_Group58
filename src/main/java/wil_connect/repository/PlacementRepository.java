@@ -15,4 +15,6 @@ public interface PlacementRepository extends JpaRepository<Placement, Integer> {
             String status);
 
     List<Placement> findByStudent_StudentId(Integer studentId);
+
+    List<Placement> findByEmployer_EmployerId(Integer employerId);
 }

@@ -57,9 +57,10 @@ public class PlacementRequestService {
         request.setStatus(EStatus.PENDING.getValue());
 
         PlacementRequest savedRequest = requestRepository.save(request);
+        // Table 4.7.14
         notificationService.sendNotification(
                 employer.getUserAccount().getUserId().intValue(),
-                "You have a new placement request.");
+                "New placement request from " + student.getFirstName() + " " + student.getLastName() + ".");
         return savedRequest;
     }
 
@@ -115,7 +116,10 @@ public class PlacementRequestService {
 
         request.setStatus(EStatus.MEETING_REQUESTED.getValue());
         PlacementRequest savedRequest = requestRepository.save(request);
-        notifyStudentOfDecision(savedRequest);
+        // The employer's message goes to the student with the new status.
+        notificationService.sendNotification(
+                savedRequest.getStudent().getUserAccount().getUserId().intValue(),
+                "Your placement request was updated: Meeting Requested. " + details.getMessage().trim());
         return savedRequest;
     }
 
@@ -165,7 +169,7 @@ public class PlacementRequestService {
     private void notifyStudentOfDecision(PlacementRequest request) {
         notificationService.sendNotification(
                 request.getStudent().getUserAccount().getUserId().intValue(),
-                "Your placement request status is now: " + request.getStatus() + ".");
+                "Your placement request was updated: " + request.getStatus() + ".");
     }
 
     private PlacementRequest getEmployerRequest(Integer requestId, Long authenticatedUserId) {

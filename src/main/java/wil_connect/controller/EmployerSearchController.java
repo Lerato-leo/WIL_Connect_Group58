@@ -48,7 +48,7 @@ public class EmployerSearchController implements EmployerSearchApi {
         response.setAddress(employer.getAddress());
         response.setContactEmail(employer.getContactEmail());
         response.setContactNumber(employer.getContactNumber());
-        response.setStatus(EmployerSummary.StatusEnum.valueOf(employer.getStatus()));
+        response.setStatus(EmployerSummary.StatusEnum.fromValue(employer.getStatus()));
         return response;
     }
 }
