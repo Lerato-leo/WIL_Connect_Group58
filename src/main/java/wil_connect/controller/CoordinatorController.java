@@ -1,6 +1,8 @@
 package wil_connect.controller;
 
 import java.security.Principal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -38,7 +40,14 @@ public class CoordinatorController {
                        s.student_number,
                        CONCAT(s.first_name, ' ', s.last_name) AS student_name,
                        e.employer_name,
-                       CONCAT(v.first_name, ' ', v.last_name) AS supervisor_name
+                       CONCAT(v.first_name, ' ', v.last_name) AS supervisor_name,
+                       p.start_date,
+                       p.end_date,
+                       (SELECT COUNT(*) FROM DUTY_LOG d
+                        WHERE d.placement_id = p.placement_id AND d.status = 'Pending') AS unverified_logs,
+                       (SELECT COUNT(*) FROM DUTY_LOG d
+                        WHERE d.placement_id = p.placement_id AND d.status = 'Pending'
+                          AND d.log_date < CURRENT_DATE - INTERVAL 3 DAY) AS waiting_logs
                 FROM PLACEMENT p
                 JOIN STUDENT s ON s.student_id = p.student_id
                 JOIN EMPLOYER e ON e.employer_id = p.employer_id
@@ -49,7 +58,11 @@ public class CoordinatorController {
                 row.getString("student_number"),
                 row.getString("student_name"),
                 row.getString("employer_name"),
-                row.getString("supervisor_name")));
+                row.getString("supervisor_name"),
+                row.getObject("start_date", LocalDate.class),
+                row.getObject("end_date", LocalDate.class),
+                row.getInt("unverified_logs"),
+                row.getInt("waiting_logs")));
 
         List<StudentProgress> progress = placements.stream()
                 .map(placement -> new StudentProgress(
@@ -58,10 +71,44 @@ public class CoordinatorController {
                         placement.studentName(),
                         placement.employerName(),
                         placement.supervisorName(),
-                        attendanceService.calculateAttendance(placement.placementId())))
+                        attendanceService.calculateAttendance(placement.placementId()),
+                        placement.unverifiedLogs(),
+                        placement.logsWaitingOver3Days(),
+                        placement.startDate(),
+                        placement.endDate()))
                 .toList();
 
         return ResponseEntity.ok(progress);
+    }
+
+    /**
+     * Sign Off Audit Log: every SIGN_OFF row, newest first, read only.
+     * Days are counted from the log date, because DUTY_LOG keeps no submission time.
+     */
+    @GetMapping("/sign-offs")
+    public ResponseEntity<List<SignOffAudit>> getSignOffAudit(Principal principal) {
+        if (!isCoordinator(principal)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(jdbc.query("""
+                SELECT o.signoff_id, o.log_id, d.log_date, o.verification_method, o.signoff_date,
+                       CONCAT(s.first_name, ' ', s.last_name) AS student_name, s.student_number,
+                       CONCAT(v.first_name, ' ', v.last_name) AS supervisor_name
+                FROM SIGN_OFF o
+                JOIN DUTY_LOG d ON d.log_id = o.log_id
+                JOIN PLACEMENT p ON p.placement_id = d.placement_id
+                JOIN STUDENT s ON s.student_id = p.student_id
+                JOIN SUPERVISOR v ON v.supervisor_id = o.supervisor_id
+                ORDER BY o.signoff_date DESC, o.signoff_id DESC
+                """, (row, index) -> new SignOffAudit(
+                row.getInt("signoff_id"),
+                row.getInt("log_id"),
+                row.getObject("log_date", LocalDate.class),
+                row.getString("student_name"),
+                row.getString("student_number"),
+                row.getString("supervisor_name"),
+                row.getString("verification_method"),
+                row.getObject("signoff_date", LocalDateTime.class))));
     }
 
     @GetMapping("/employers")
@@ -138,7 +185,11 @@ public class CoordinatorController {
             String studentNumber,
             String studentName,
             String employerName,
-            String supervisorName) {
+            String supervisorName,
+            LocalDate startDate,
+            LocalDate endDate,
+            int unverifiedLogs,
+            int logsWaitingOver3Days) {
     }
 
     public record StudentProgress(
@@ -147,7 +198,22 @@ public class CoordinatorController {
             String studentName,
             String employerName,
             String supervisorName,
-            AttendanceProgress attendance) {
+            AttendanceProgress attendance,
+            int unverifiedLogs,
+            int logsWaitingOver3Days,
+            LocalDate startDate,
+            LocalDate endDate) {
+    }
+
+    public record SignOffAudit(
+            int signoffId,
+            int logId,
+            LocalDate logDate,
+            String studentName,
+            String studentNumber,
+            String supervisorName,
+            String verificationMethod,
+            LocalDateTime signoffDate) {
     }
 
     public record EmployerSummary(int employerId, String employerName, String status) {
