@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       rows = await API.getStudentProgress();
       const done = rows.filter((r) => r.attendance && r.attendance.status === 'COMPLETE').length;
-      // logsWaitingOver3Days is not in the C7 response yet, see api.js (CHECK WITH OWNER).
       const hasWaiting = rows.some((r) => r.logsWaitingOver3Days !== undefined);
       document.getElementById('fact-students').textContent = rows.length;
       document.getElementById('fact-done').textContent = done;

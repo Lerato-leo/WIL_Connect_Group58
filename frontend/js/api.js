@@ -4,10 +4,8 @@
    Pages only call the functions in window.API. They never write
    a URL themselves.
 
-   Comment labels used on the paths below:
-     LIVE ON MAIN      the endpoint exists on main today
-     ON BRANCH ...     written by a teammate, not merged into main yet
-     CHECK WITH OWNER  a guess, the endpoint does not exist yet
+   Every path below is served by the Spring Boot backend
+   (C2 to C7, brought together on fix/backend-integration).
    ========================================================== */
 
 // true: every function returns the sample data at the bottom of this file.
@@ -45,55 +43,52 @@ const SESSION_KEY = 'wil_session';
 
 // ---------- Endpoint paths ----------
 const PATHS = {
-  // C2 login and register. LIVE ON MAIN
+  // C2 login and register (public)
   LOGIN: '/api/auth/login',
   REGISTER: '/api/auth/register',
-  // Approved employers for the supervisor sign up list, without login. CHECK WITH OWNER
+  // Approved employers for the supervisor sign up list
   REGISTER_EMPLOYERS: '/api/auth/employers',
 
-  // C3 employer search and placement requests. LIVE ON MAIN
+  // C3 employer search, placement requests and placements
   EMPLOYER_SEARCH: '/api/students/employers',
   STUDENT_REQUESTS: '/api/students/placement-requests',
   EMPLOYER_REQUESTS: '/api/employers/placement-requests',
   ACCEPT_REQUEST: (requestId) => `/api/employers/placement-requests/${requestId}/accept`,
   REJECT_REQUEST: (requestId) => `/api/employers/placement-requests/${requestId}/reject`,
   MEETING_REQUEST: (requestId) => `/api/employers/placement-requests/${requestId}/meeting`,
-  // LIVE ON MAIN, but the controller methods still return an empty body
   STUDENT_PLACEMENTS: '/api/students/placements',
   EMPLOYER_PLACEMENTS: '/api/employers/placements',
 
-  // C6 attendance and notifications. ON BRANCH c6-attendance-notifications
+  // C6 attendance and notifications
   ATTENDANCE: (placementId) => `/api/placements/${placementId}/attendance`,
   NOTIFICATIONS: '/api/notifications',
   NOTIFICATION_READ: (notificationId) => `/api/notifications/${notificationId}/read`,
 
-  // C7 coordinator. ON BRANCH c7-coordinator-dashboard
+  // C7 coordinator and the compliance report
   STUDENT_PROGRESS: '/api/coordinator/student-progress',
   COORDINATOR_EMPLOYERS: '/api/coordinator/employers',
   APPROVE_EMPLOYER: (employerId) => `/api/coordinator/employers/${employerId}/approve`,
   DEACTIVATE_EMPLOYER: (employerId) => `/api/coordinator/employers/${employerId}/deactivate`,
   COMPLIANCE_REPORT: (placementId) => `/api/placements/${placementId}/compliance-report`,
+  PLACEMENT_LOGS: (placementId) => `/api/placements/${placementId}/duty-logs`,
+  SIGN_OFF_AUDIT: '/api/coordinator/sign-offs',
 
-  // C4 duty log and proof upload. CHECK WITH OWNER (not built yet)
-  MY_DUTY_LOGS: '/api/students/duty-logs',                                  // CHECK WITH OWNER
-  DUTY_LOG: (logId) => `/api/students/duty-logs/${logId}`,                  // CHECK WITH OWNER
-  PROOF_FILE: (proofId) => `/api/proofs/${proofId}/file`,                    // CHECK WITH OWNER
+  // C4 duty logs (multipart form data) and proof files
+  MY_DUTY_LOGS: '/api/students/duty-logs',
+  DUTY_LOG: (logId) => `/api/students/duty-logs/${logId}`,
+  PROOF_FILE: (proofId) => `/api/proofs/${proofId}/file`,
 
-  // C5 supervisor review and sign off. CHECK WITH OWNER (not built yet)
-  SUPERVISOR_PENDING: '/api/supervisors/duty-logs',                         // CHECK WITH OWNER (?status=Pending)
-  SUPERVISOR_LOG: (logId) => `/api/supervisors/duty-logs/${logId}`,         // CHECK WITH OWNER
-  SIGN_OFF: (logId) => `/api/supervisors/duty-logs/${logId}/sign-off`,      // CHECK WITH OWNER
-  REJECT_LOG: (logId) => `/api/supervisors/duty-logs/${logId}/reject`,      // CHECK WITH OWNER
-  SIGN_OFF_HISTORY: '/api/supervisors/sign-offs',                           // CHECK WITH OWNER
-  SUPERVISOR_STUDENTS: '/api/supervisors/placements',                       // CHECK WITH OWNER
+  // C5 supervisor review and sign off
+  SUPERVISOR_PENDING: '/api/supervisors/duty-logs',
+  SUPERVISOR_LOG: (logId) => `/api/supervisors/duty-logs/${logId}`,
+  SIGN_OFF: (logId) => `/api/supervisors/duty-logs/${logId}/sign-off`,
+  REJECT_LOG: (logId) => `/api/supervisors/duty-logs/${logId}/reject`,
+  SIGN_OFF_HISTORY: '/api/supervisors/sign-offs',
+  SUPERVISOR_STUDENTS: '/api/supervisors/placements',
 
-  // Employer details and supervisors. CHECK WITH OWNER (not built yet)
-  EMPLOYER_PROFILE: '/api/employers/me',                                    // CHECK WITH OWNER
-  EMPLOYER_SUPERVISORS: '/api/employers/supervisors',                       // CHECK WITH OWNER
-
-  // Coordinator extras. CHECK WITH OWNER (not built yet)
-  PLACEMENT_LOGS: (placementId) => `/api/placements/${placementId}/duty-logs`, // CHECK WITH OWNER
-  SIGN_OFF_AUDIT: '/api/coordinator/sign-offs'                              // CHECK WITH OWNER
+  // Employer company details and supervisors
+  EMPLOYER_PROFILE: '/api/employers/me',
+  EMPLOYER_SUPERVISORS: '/api/employers/supervisors'
 };
 
 // ---------- Error type used by every function ----------
@@ -199,11 +194,12 @@ async function login(email, password) {
 }
 
 // ----- registerUser (4.6.2), used by the coordinator Users page -----
-// details: { email, password, role }
+// details: { email, password, role }. Sent with the coordinator's login, because
+// only a logged in coordinator may create another coordinator.
 async function registerUser(details) {
   if (USE_FAKE_DATA) return Fake.registerUser(details);
-  const { email, password, role } = details; // RegisterRequest only has these three fields
-  return request(PATHS.REGISTER, { method: 'POST', body: { email, password, role }, skipAuth: true });
+  const { email, password, role } = details;
+  return request(PATHS.REGISTER, { method: 'POST', body: { email, password, role } });
 }
 
 // ----- registerUser (4.6.2), the public Create an account page -----
@@ -211,8 +207,7 @@ async function registerUser(details) {
 //   Student: studentNumber
 //   Supervisor: employerId, phone, pin
 //   Employer: employerName, address, contactEmail, contactNumber
-// The backend RegisterRequest only reads email, password and role today; the other
-// fields are needed to create the STUDENT, SUPERVISOR or EMPLOYER row. CHECK WITH OWNER
+// The backend saves the account and the STUDENT, SUPERVISOR or EMPLOYER row together.
 async function registerAccount(details) {
   if (USE_FAKE_DATA) return Fake.registerAccount(details);
   return request(PATHS.REGISTER, { method: 'POST', body: details, skipAuth: true });
@@ -968,7 +963,8 @@ const Fake = (() => {
       if (!log || placementById(db, log.placementId).supervisorId !== user.supervisorId) fail('You can only sign logs of your own students', 403);
       if (log.status !== 'Pending') fail('This log is not waiting for sign off', 409);
       const supervisor = supervisorById(db, user.supervisorId);
-      if (details.verificationMethod === 'PIN' && details.pin !== supervisor.pin) fail('Incorrect PIN', 401);
+      // 400, like the backend: 401 would mean the login itself has ended.
+      if (details.verificationMethod === 'PIN' && details.pin !== supervisor.pin) fail('Incorrect PIN', 400);
       if (details.verificationMethod === 'Signature' && !details.signatureData) fail('Please sign in the box', 400);
       db.signOffs.push({ signoffId: db.nextId.signOff++, logId, supervisorId: user.supervisorId, signoffDate: new Date().toISOString(), verificationMethod: details.verificationMethod });
       Object.assign(log, { status: 'Signed', supervisorComment: null });
@@ -1017,7 +1013,8 @@ const Fake = (() => {
       await pause();
       const db = load();
       checkAccess(db, 'COORDINATOR');
-      const threeDaysAgo = Date.now() - 3 * 24 * HOUR;
+      // Counted from the log date, as the backend does (DUTY_LOG keeps no submission time).
+      const threeDaysAgo = toDateString(new Date(Date.now() - 3 * 24 * HOUR));
       return db.placements.map((p) => {
         const view = toPlacementResponse(db, p);
         const pending = db.logs.filter((l) => l.placementId === p.placementId && l.status === 'Pending');
@@ -1025,9 +1022,8 @@ const Fake = (() => {
           placementId: p.placementId, studentNumber: view.studentNumber, studentName: view.studentName,
           employerName: view.employerName, supervisorName: view.supervisorName,
           attendance: attendance(db, p.placementId),
-          // The fields below are not in the C7 response yet. CHECK WITH OWNER
           unverifiedLogs: pending.length,
-          logsWaitingOver3Days: pending.filter((l) => new Date(l.submittedAt).getTime() < threeDaysAgo).length,
+          logsWaitingOver3Days: pending.filter((l) => l.logDate < threeDaysAgo).length,
           startDate: p.startDate, endDate: p.endDate
         };
       });

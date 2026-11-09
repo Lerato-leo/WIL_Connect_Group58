@@ -136,7 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { window.location.href = 'supervisor-pending.html#pending'; }, 700);
     } catch (err) {
       UI.setBusy(approveButton, false);
-      if (method === 'PIN' && err.status === 401) { UI.fieldError(pin, 'Incorrect PIN'); pin.select(); }
+      if (method === 'PIN' && err.status === 400 && /pin/i.test(err.message)) { UI.fieldError(pin, err.message); pin.select(); }
+      else if (method === 'PIN' && err.status === 429) { UI.fieldError(pin, err.message); }
       else UI.formAlert(form, err.message);
     }
   });
@@ -220,5 +221,16 @@ function createSignaturePad(canvas, onChange) {
   canvas.addEventListener('pointercancel', stop);
   window.addEventListener('resize', () => { if (!hasInk) resize(); });
 
-  return { canvas, resize, clear: resize, isEmpty: () => !hasInk, toDataURL: () => canvas.toDataURL('image/png') };
+  // The saved copy is at most 600 pixels wide, so it fits the SIGN_OFF column on any screen.
+  function toDataURL() {
+    const scale = Math.min(1, 600 / canvas.width);
+    if (scale === 1) return canvas.toDataURL('image/png');
+    const copy = document.createElement('canvas');
+    copy.width = Math.round(canvas.width * scale);
+    copy.height = Math.round(canvas.height * scale);
+    copy.getContext('2d').drawImage(canvas, 0, 0, copy.width, copy.height);
+    return copy.toDataURL('image/png');
+  }
+
+  return { canvas, resize, clear: resize, isEmpty: () => !hasInk, toDataURL };
 }

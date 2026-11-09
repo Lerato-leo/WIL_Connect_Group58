@@ -27,6 +27,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }));
   window.addEventListener('hashchange', () => show(fromHash()));
 
+  // Days since the log date: "Today", "1 day", "5 days".
+  function waitingSince(logDate) {
+    const [y, m, d] = String(logDate).split('-').map(Number);
+    const start = new Date(y, m - 1, d);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const days = Math.max(0, Math.round((today - start) / 86400000));
+    return days === 0 ? 'Today' : days === 1 ? '1 day' : `${days} days`;
+  }
+
   // Pending Sign Offs: oldest log first (Table 4.7.13).
   async function loadPending() {
     const el = panels.pending;
@@ -40,14 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!logs.length) return UI.empty(el, 'Nothing to sign off', 'New logs from your students will show here.');
       UI.paged(el, logs, (rows) => `<div class="table-wrap"><table class="table">
-        <thead><tr><th>Student name</th><th>Student number</th><th>Log date</th><th class="num">Hours</th><th>Submitted on</th><th class="right"><span class="visually-hidden">Action</span></th></tr></thead>
+        <thead><tr><th>Student name</th><th>Student number</th><th>Log date</th><th class="num">Hours</th><th>Waiting</th><th class="right"><span class="visually-hidden">Action</span></th></tr></thead>
         <tbody>${rows.map((l) => `
           <tr>
             <td class="cell-strong">${UI.esc(l.studentName)}</td>
             <td class="num">${UI.esc(l.studentNumber)}</td>
             <td class="nowrap">${UI.esc(UI.formatDate(l.logDate))}</td>
             <td class="num">${UI.formatHours(l.hoursWorked)}</td>
-            <td class="nowrap muted">${UI.esc(UI.formatDateTime(l.submittedAt))}</td>
+            <td class="nowrap muted">${UI.esc(waitingSince(l.logDate))}</td>
             <td class="right"><a class="btn btn-primary btn-sm" href="supervisor-signoff.html?log=${l.logId}">Review</a></td>
           </tr>`).join('')}</tbody></table></div>`);
     } catch (err) {
