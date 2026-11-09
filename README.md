@@ -57,20 +57,41 @@ Run both files again whenever you need a clean demonstration database.
 
 ### 3. Backend
 
-In IntelliJ, run `WilConnectApplication`. Or from the project folder:
+In IntelliJ, run `WilConnectApplication`.
 
+On Windows, or from PowerShell in the project folder, run:
+
+```powershell
+.\mvnw.cmd spring-boot:run
 ```
-mvnw spring-boot:run
+
+On macOS or Linux, run:
+
+```bash
+./mvnw spring-boot:run
 ```
 
 ### 4. Open WIL Connect
 
 Open **http://localhost:8080** in the browser. It goes straight to the login page and
-uses the real database. The OpenAPI files are at http://localhost:8080/swagger-ui/index.html.
+uses the real database. Swagger UI is at http://localhost:8080/swagger-ui/index.html.
+The OpenAPI specifications are in src/main/resources/static/openapi/.
 
-If port 8080 is taken (for example by XAMPP's Apache), start the backend on another
-port with `SERVER_PORT=8081` and open http://localhost:8081. Nothing else needs changing,
-because the pages call the API on their own address.
+If port 8080 is already in use, start the backend on port 8081.
+
+On Windows PowerShell:
+
+```powershell
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--server.port=8081"
+```
+
+On macOS/Linux:
+
+```bash
+SERVER_PORT=8081 ./mvnw spring-boot:run
+```
+
+Then open http://localhost:8081. Nothing else needs changing because the pages call the API on their own address.
 
 ### Designing pages without the backend
 
@@ -98,7 +119,7 @@ Supervisor demo PIN: **1234**. These passwords and the PIN are for demonstration
 
 - One coordinator, two students, two supervisors and two employers (one approved, one pending)
 - Three placement requests and one active placement
-- Twelve signed duty logs, one rejected and one pending
+- Twelve signed duty logs, plus one rejected and one pending log.
 - PIN and drawn signature sign off records, proof of work records and notifications
 
 The active placement: John Smith (20240123) at Nexus Tech Solutions, supervised by
@@ -120,7 +141,8 @@ overridden when starting the backend, for example `SERVER_PORT=8081` or
 | Setting | Default | Meaning |
 | --- | --- | --- |
 | `spring.datasource.url` | `jdbc:mysql://localhost:3306/wil_connect` | The database |
-| `spring.datasource.username` / `password` | `root` / see the file | Database login |
+| `spring.datasource.username` | `root` | Database username |
+| `spring.datasource.password` | Your local MySQL password | Database password |
 | `server.port` | `8080` | Port of the API and the web pages |
 | `spring.web.resources.static-locations` | `file:frontend/,classpath:/static/` | Where the web pages are read from |
 | `wil.upload.dir` | `uploads/proof` | Folder for proof of work files |
@@ -152,20 +174,38 @@ described in [docs/api.md](docs/api.md).
 
 ## Running the tests
 
-The tests run against MySQL, so load `schema.sql` and `seed.sql` first. Every test is
-rolled back, so the seed data stays the same and the tests can run again.
+The tests run against MySQL, so load `schema.sql` and `seed.sql` first. The tests are designed to roll back their database changes so the seed rows remain unchanged and the suite can run again.
 
-```
-mvnw test
-```
+### Windows PowerShell
 
-To use another database or password without editing `application.properties`:
-
-```
-SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/wil_connect SPRING_DATASOURCE_PASSWORD=yourpassword mvnw test
+```powershell
+.\mvnw.cmd test
 ```
 
-There are 119 tests. What they cover is in [docs/testing/test-summary.md](docs/testing/test-summary.md).
+### macOS/Linux
+
+```bash
+./mvnw test
+```
+
+To use another database or password without editing
+`application.properties`:
+
+### Windows PowerShell
+
+```powershell
+$env:SPRING_DATASOURCE_URL = "jdbc:mysql://localhost:3306/wil_connect"
+$env:SPRING_DATASOURCE_PASSWORD = "yourpassword"
+.\mvnw.cmd test
+```
+
+### macOS/Linux
+
+```bash
+SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/wil_connect SPRING_DATASOURCE_PASSWORD=yourpassword ./mvnw test
+```
+
+The suite currently contains 119 tests. What they cover is in [docs/testing/test-summary.md](docs/testing/test-summary.md).
 
 ## Project structure
 
