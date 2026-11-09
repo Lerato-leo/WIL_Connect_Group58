@@ -102,6 +102,19 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<!-- The web pages in frontend/ are served by the backend at http://localhost:8080/ -->
+			<resource>
+				<directory>frontend</directory>
+				<targetPath>static</targetPath>
+				<excludes>
+					<exclude>README.md</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 
 			<plugin>

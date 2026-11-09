@@ -25,10 +25,13 @@ Everyone gets notifications. Messages that ask for an action open the page that 
 | --- | --- | --- | --- |
 | Database | MySQL 8 | 3306 | `src/main/resources/db/` |
 | Backend (REST API) | Spring Boot 3.5, Java 17 | 8080 | `src/` |
-| Frontend | HTML, CSS and JavaScript (no build step) | Any static server, for example VS Code Live Server on 5500 | `frontend/` |
+| Frontend | HTML, CSS and JavaScript (no build step) | 8080, served by the backend | `frontend/` |
 
-The frontend calls the API at `http://localhost:8080` (set in `frontend/js/api.js`).
-Requests from pages on `localhost` or `127.0.0.1` are allowed by the CORS setting.
+The Spring Boot application serves both the REST API (`/api/...`) and the web pages
+(`/pages/...`) on port 8080, so the browser talks to one address and needs no cross
+origin setup. The pages are packaged into the application when it is built, and read
+straight from `frontend/` while it runs from the project folder, so page edits show on
+refresh.
 
 ## Getting started
 
@@ -60,22 +63,22 @@ In IntelliJ, run `WilConnectApplication`. Or from the project folder:
 mvnw spring-boot:run
 ```
 
-The API starts on http://localhost:8080. The OpenAPI files are served at
-http://localhost:8080/swagger-ui/index.html.
+### 4. Open WIL Connect
 
-### 4. Frontend
+Open **http://localhost:8080** in the browser. It goes straight to the login page and
+uses the real database. The OpenAPI files are at http://localhost:8080/swagger-ui/index.html.
 
-Serve the `frontend/` folder with any static server and open `pages/login.html`:
+If port 8080 is taken (for example by XAMPP's Apache), start the backend on another
+port with `SERVER_PORT=8081` and open http://localhost:8081. Nothing else needs changing,
+because the pages call the API on their own address.
 
-- VS Code: right click `frontend/index.html` and choose Open with Live Server, or
-- `python -m http.server 5500` inside `frontend/`, then open http://localhost:5500/pages/login.html
+### Designing pages without the backend
 
-`frontend/js/api.js` has one switch:
-
-- `USE_FAKE_DATA = false` uses the backend (for the demo with the database).
-- `USE_FAKE_DATA = true` runs every page on built in sample data, without a backend.
-
-If the backend runs on another port, change `API_BASE_URL` in the same file.
+The pages can also be opened from a separate file server such as VS Code Live Server
+(right click `frontend/index.html`, Open with Live Server) or `python -m http.server 5500`
+inside `frontend/`. Opened that way, every page runs on built in sample data that matches
+`seed.sql`, so no backend or database is needed. `frontend/js/api.js` explains how this is
+chosen and how to override it.
 
 ## Test accounts
 
@@ -118,10 +121,11 @@ overridden when starting the backend, for example `SERVER_PORT=8081` or
 | --- | --- | --- |
 | `spring.datasource.url` | `jdbc:mysql://localhost:3306/wil_connect` | The database |
 | `spring.datasource.username` / `password` | `root` / see the file | Database login |
-| `server.port` | `8080` | Port of the API |
+| `server.port` | `8080` | Port of the API and the web pages |
+| `spring.web.resources.static-locations` | `file:frontend/,classpath:/static/` | Where the web pages are read from |
 | `wil.upload.dir` | `uploads/proof` | Folder for proof of work files |
 | `wil.upload.create-missing-samples` | `true` | Create sample files for seed proofs that are missing |
-| `wil.cors.allowed-origins` | `http://localhost:*,http://127.0.0.1:*` | Browser addresses allowed to call the API |
+| `wil.cors.allowed-origins` | `http://localhost:*,http://127.0.0.1:*` | Other browser addresses allowed to call the API (only needed when pages are opened from a separate server) |
 | `spring.servlet.multipart.max-file-size` | `5MB` | Largest proof file |
 
 ## API
@@ -161,7 +165,7 @@ To use another database or password without editing `application.properties`:
 SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/wil_connect SPRING_DATASOURCE_PASSWORD=yourpassword mvnw test
 ```
 
-There are 116 tests. What they cover is in [docs/testing/test-summary.md](docs/testing/test-summary.md).
+There are 119 tests. What they cover is in [docs/testing/test-summary.md](docs/testing/test-summary.md).
 
 ## Project structure
 

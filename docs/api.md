@@ -1,6 +1,6 @@
 # WIL Connect API
 
-Base address: `http://localhost:8080`. All bodies are JSON unless stated otherwise.
+Base address: `http://localhost:8080`, the same address as the web pages. All bodies are JSON unless stated otherwise.
 
 ## Login and errors
 
