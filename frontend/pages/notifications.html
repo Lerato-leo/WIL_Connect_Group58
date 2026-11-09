@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notifications · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/notifications.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <main class="main" id="main" tabindex="-1">
+      <!-- Notification list (FR8, Table 4.7.11), for every role -->
+      <div class="page-head">
+        <div>
+          <h1>Notifications</h1>
+          <p>Messages about your logs, sign offs and placement requests. Newest first.</p>
+        </div>
+        <button type="button" class="btn hidden" id="mark-all-page">Mark all as read</button>
+      </div>
+      <section class="card" aria-label="Notifications"><div id="list"></div></section>
+    </main>
+  </div>
+</body>
+</html>

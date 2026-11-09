@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pending Sign Offs · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/supervisor-pending.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <!-- Supervisor dashboard, Pending Sign Offs, Signed Logs and My Students (Table 4.7.2, 4.7.13) -->
+    <main class="main" id="main" tabindex="-1">
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Logs from your students that wait for your sign off.</p>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div class="card"><strong id="fact-count">0</strong><span>Logs waiting for sign off</span></div>
+        <div class="card"><strong id="fact-hours">0.0</strong><span>Hours waiting for sign off</span></div>
+        <div class="card"><strong id="fact-oldest">None</strong><span>Oldest log waiting</span></div>
+      </div>
+
+      <section class="card">
+        <div class="tabs" role="tablist" aria-label="Logs and students">
+          <button type="button" class="tab" role="tab" id="tab-pending" aria-controls="panel-pending" aria-selected="true">Pending Sign Offs</button>
+          <button type="button" class="tab" role="tab" id="tab-history" aria-controls="panel-history" aria-selected="false">Signed Logs</button>
+          <button type="button" class="tab" role="tab" id="tab-students" aria-controls="panel-students" aria-selected="false">My Students</button>
+        </div>
+        <div id="panel-pending" role="tabpanel" aria-labelledby="tab-pending"></div>
+        <div id="panel-history" role="tabpanel" aria-labelledby="tab-history" class="hidden"></div>
+        <div id="panel-students" role="tabpanel" aria-labelledby="tab-students" class="hidden"></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

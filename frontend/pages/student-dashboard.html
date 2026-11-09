@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/student-dashboard.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <!-- Student dashboard, Figure 4.7.5 and Table 4.7.12 -->
+    <main class="main" id="main" tabindex="-1">
+      <div class="page-head">
+        <div>
+          <h1 id="greeting">Dashboard</h1>
+          <p id="placement-line">Loading your placement</p>
+        </div>
+      </div>
+
+      <div class="grid-main-side">
+        <!-- Progress card (FR7). The Attendance menu item opens this card. -->
+        <section class="card hours-card" id="attendance" aria-labelledby="hours-title" style="scroll-margin-top:80px">
+          <h2 id="hours-title" class="hours-label" style="font-weight:500">Hours signed off</h2>
+          <div id="hours"></div>
+        </section>
+
+        <!-- Action card: Log Today's Duty or the status of today's log -->
+        <section class="card today-card" aria-labelledby="today-title">
+          <p class="small muted">Today</p>
+          <h2 id="today-title"></h2>
+          <div id="today" class="today-body"></div>
+        </section>
+      </div>
+
+      <div class="grid-main-side" style="margin-top:20px">
+        <section class="card" aria-labelledby="recent-title">
+          <div class="card-head">
+            <h2 id="recent-title">Recent logs</h2>
+            <a class="see-all" href="daily-log.html#logs">See all</a>
+          </div>
+          <div id="recent"></div>
+        </section>
+
+        <section class="card" aria-labelledby="notes-title">
+          <div class="card-head">
+            <h2 id="notes-title">Notifications</h2>
+            <a class="see-all" href="notifications.html">See all</a>
+          </div>
+          <div id="notes"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

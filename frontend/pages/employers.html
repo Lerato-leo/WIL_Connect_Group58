@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Find Employers · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/employers.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <!-- Employer search and placement request, Table 4.7.6 (FR2, FR3) -->
+    <main class="main" id="main" tabindex="-1">
+      <div class="page-head">
+        <div>
+          <h1>Find Employers</h1>
+          <p>Only employers approved by your coordinator are listed. Send a request to the ones you would like to work for.</p>
+        </div>
+      </div>
+
+      <form class="toolbar" id="search-form" role="search" novalidate>
+        <div class="field" style="flex:1;max-width:360px">
+          <label class="visually-hidden" for="search">Search by employer name or address</label>
+          <input class="input" id="search" name="search" type="search" placeholder="Search by name or address" autocomplete="off" maxlength="60">
+        </div>
+        <label class="visually-hidden" for="area">Filter by area</label>
+        <select class="select" id="area"><option value="">All areas</option></select>
+        <span class="small muted" id="result-count" aria-live="polite"></span>
+      </form>
+
+      <div id="employers"></div>
+    </main>
+  </div>
+</body>
+</html>

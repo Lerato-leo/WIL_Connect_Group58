@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Placement Requests · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/employer-requests.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <!-- Employer dashboard, Placement Requests, Students on Placement, Supervisors (Table 4.7.2) -->
+    <main class="main" id="main" tabindex="-1">
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <p id="company-line">Answer students who would like to do their Work Integrated Learning with you.</p>
+        </div>
+      </div>
+
+      <div id="approval-note"></div>
+
+      <div class="summary">
+        <div class="card"><strong id="fact-new">0</strong><span>New requests</span></div>
+        <div class="card"><strong id="fact-meeting">0</strong><span>Meetings asked for</span></div>
+        <div class="card"><strong id="fact-current">0</strong><span>Current students</span></div>
+      </div>
+
+      <section class="card" id="requests" aria-labelledby="requests-title" style="scroll-margin-top:80px">
+        <div class="card-head"><h2 id="requests-title">Placement Requests</h2></div>
+        <div class="tabs" role="tablist" aria-label="Filter requests by status" id="status-tabs">
+          <button type="button" class="tab" role="tab" aria-selected="true" data-status="">All</button>
+          <button type="button" class="tab" role="tab" aria-selected="false" data-status="Pending">Pending</button>
+          <button type="button" class="tab" role="tab" aria-selected="false" data-status="Meeting Requested">Meeting requested</button>
+          <button type="button" class="tab" role="tab" aria-selected="false" data-status="Accepted">Accepted</button>
+          <button type="button" class="tab" role="tab" aria-selected="false" data-status="Rejected">Rejected</button>
+        </div>
+        <div id="request-list" role="tabpanel"></div>
+      </section>
+
+      <section class="card" id="placements" aria-labelledby="placements-title" style="scroll-margin-top:80px">
+        <div class="card-head"><h2 id="placements-title">Students on Placement</h2></div>
+        <div id="placement-list"></div>
+      </section>
+
+      <section class="card" id="supervisors" aria-labelledby="supervisors-title" style="scroll-margin-top:80px">
+        <div class="card-head">
+          <div>
+            <h2 id="supervisors-title">Supervisors</h2>
+            <p>Workplace supervisors who sign off the logs of your students.</p>
+          </div>
+        </div>
+        <div id="supervisor-list"></div>
+      </section>
+
+      <section class="card" id="company" aria-labelledby="company-title" style="scroll-margin-top:80px">
+        <div class="card-head">
+          <div>
+            <h2 id="company-title">Company details</h2>
+            <p>Students see these details when they search for employers.</p>
+          </div>
+        </div>
+        <div id="company-state"></div>
+        <form id="company-form" class="hidden" novalidate>
+          <div data-form-alert style="margin-bottom:16px"></div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="employerName">Employer name</label>
+              <input class="input" id="employerName" name="employerName" maxlength="100" autocomplete="organization" required>
+            </div>
+            <div class="field">
+              <label for="contactEmail">Contact email</label>
+              <input class="input" id="contactEmail" name="contactEmail" type="email" maxlength="100" autocomplete="email" required>
+            </div>
+            <div class="field">
+              <label for="contactNumber">Contact number</label>
+              <input class="input num" id="contactNumber" name="contactNumber" type="tel" maxlength="10" inputmode="numeric" autocomplete="tel" required>
+              <span class="hint">10 digits starting with 0.</span>
+            </div>
+            <div class="field">
+              <label for="address">Address</label>
+              <input class="input" id="address" name="address" maxlength="200" autocomplete="street-address" required>
+              <span class="hint">End with the city, for example: 12 Rivonia Road, Sandton, Johannesburg</span>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="company-save">Save details</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

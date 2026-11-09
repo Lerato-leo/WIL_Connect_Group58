@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create an account · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/pages/register.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#register-form">Skip to the form</a>
+  <!-- Registration form, Table 4.7.4 and registerUser (4.6.2) -->
+  <div class="auth">
+    <header class="auth-top">
+      <a class="brand" href="login.html" id="brand"><span class="brand-text"><span class="brand-name">WIL <span class="brand-accent">Connect</span></span><span class="brand-tag">Sign off portal</span></span></a>
+      <span class="row small muted">Already have an account? <a class="btn btn-light btn-sm" href="login.html">Log in</a></span>
+    </header>
+
+    <main class="auth-body register-body">
+      <section aria-labelledby="intro-title">
+        <h1 id="intro-title">Create your account.</h1>
+        <p class="lead">Students, workplace supervisors and employers register here. Coordinator accounts are created by the WIL office.</p>
+        <ul class="register-notes">
+          <li><strong>Students</strong> need the student number from Richfield.</li>
+          <li><strong>Supervisors</strong> choose their employer and set a verification PIN for signing off logs.</li>
+          <li><strong>Employers</strong> can be found by students once a coordinator approves the company.</li>
+        </ul>
+      </section>
+
+      <form class="card auth-card" id="register-form" novalidate>
+        <h2>Create an account</h2>
+        <p class="muted small" style="margin:4px 0 20px">All fields are required.</p>
+        <div data-form-alert style="margin-bottom:16px"></div>
+
+        <fieldset class="field" style="border:0;padding:0;margin:0 0 16px">
+          <legend style="margin-bottom:8px">I am a</legend>
+          <div class="choice choice-3" id="role">
+            <label><input type="radio" name="role" value="STUDENT">Student</label>
+            <label><input type="radio" name="role" value="SUPERVISOR">Supervisor</label>
+            <label><input type="radio" name="role" value="EMPLOYER">Employer</label>
+          </div>
+        </fieldset>
+
+        <div id="role-fields" class="hidden">
+          <div class="form-grid">
+            <div class="field">
+              <label for="firstName" id="first-label">First name</label>
+              <input class="input" id="firstName" name="firstName" maxlength="50" autocomplete="given-name">
+            </div>
+            <div class="field">
+              <label for="lastName" id="last-label">Last name</label>
+              <input class="input" id="lastName" name="lastName" maxlength="50" autocomplete="family-name">
+            </div>
+
+            <!-- Student only -->
+            <div class="field field-full" data-for="STUDENT">
+              <label for="studentNumber">Student number</label>
+              <input class="input num" id="studentNumber" name="studentNumber" inputmode="numeric" maxlength="10" autocomplete="off">
+              <span class="hint">Digits only, 6 to 10 long.</span>
+            </div>
+
+            <!-- Supervisor only -->
+            <div class="field field-full" data-for="SUPERVISOR">
+              <label for="employerId">Employer</label>
+              <select class="select" id="employerId" name="employerId"><option value="">Loading employers</option></select>
+              <span class="hint">Only approved employers are listed.</span>
+            </div>
+            <div class="field" data-for="SUPERVISOR">
+              <label for="phone">Phone</label>
+              <input class="input num" id="phone" name="phone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel">
+              <span class="hint">10 digits starting with 0.</span>
+            </div>
+            <div class="field" data-for="SUPERVISOR">
+              <label for="pin">Verification PIN</label>
+              <input class="input num" id="pin" name="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+              <span class="hint">4 to 6 digits. You use it to sign off logs.</span>
+            </div>
+
+            <!-- Employer only -->
+            <div class="field field-full" data-for="EMPLOYER">
+              <label for="employerName">Employer name</label>
+              <input class="input" id="employerName" name="employerName" maxlength="100" autocomplete="organization">
+            </div>
+            <div class="field field-full" data-for="EMPLOYER">
+              <label for="address">Address</label>
+              <input class="input" id="address" name="address" maxlength="200" autocomplete="street-address">
+              <span class="hint">End with the city, for example: 12 Rivonia Road, Sandton, Johannesburg</span>
+            </div>
+            <div class="field" data-for="EMPLOYER">
+              <label for="contactEmail">Contact email</label>
+              <input class="input" id="contactEmail" name="contactEmail" type="email" maxlength="100" autocomplete="email">
+            </div>
+            <div class="field" data-for="EMPLOYER">
+              <label for="contactNumber">Contact number</label>
+              <input class="input num" id="contactNumber" name="contactNumber" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel">
+              <span class="hint">10 digits starting with 0.</span>
+            </div>
+
+            <div class="field field-full">
+              <label for="email">Email</label>
+              <input class="input" id="email" name="email" type="email" maxlength="100" autocomplete="username">
+              <span class="hint">You log in with this email.</span>
+            </div>
+            <div class="field">
+              <label for="password">Password</label>
+              <input class="input" id="password" name="password" type="password" maxlength="72" autocomplete="new-password">
+              <span class="hint">At least 8 characters with a letter and a number.</span>
+            </div>
+            <div class="field">
+              <label for="confirm">Confirm password</label>
+              <input class="input" id="confirm" name="confirm" type="password" maxlength="72" autocomplete="new-password">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-block" id="create-button">Create account</button>
+          </div>
+        </div>
+        <p class="small muted" style="margin-top:16px">Already have an account? <a href="login.html">Log in</a></p>
+      </form>
+    </main>
+
+    <footer class="auth-foot">WIL Connect will never ask for your password by email.</footer>
+  </div>
+</body>
+</html>

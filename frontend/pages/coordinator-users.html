@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Users · WIL Connect</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/api.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/ui.js" defer></script>
+  <script src="../js/layout.js" defer></script>
+  <script src="../js/pages/coordinator-users.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app" id="app">
+    <main class="main" id="main" tabindex="-1">
+      <!-- Users: create coordinator accounts (FR1, Table 4.7.2) -->
+      <div class="page-head">
+        <div>
+          <h1>Users</h1>
+          <p>Create accounts for other academic coordinators. Students, supervisors and employers register themselves.</p>
+        </div>
+      </div>
+      <section class="card" aria-labelledby="new-title" style="max-width:640px">
+        <h2 id="new-title" style="margin-bottom:16px">New coordinator account</h2>
+        <form id="user-form" novalidate>
+          <div data-form-alert style="margin-bottom:16px"></div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="firstName">First name</label>
+              <input class="input" id="firstName" name="firstName" maxlength="50" autocomplete="off" required>
+            </div>
+            <div class="field">
+              <label for="lastName">Last name</label>
+              <input class="input" id="lastName" name="lastName" maxlength="50" autocomplete="off" required>
+            </div>
+            <div class="field field-full">
+              <label for="email">Email</label>
+              <input class="input" id="email" name="email" type="email" maxlength="100" autocomplete="off" required>
+            </div>
+            <div class="field">
+              <label for="password">Password</label>
+              <input class="input" id="password" name="password" type="password" maxlength="72" autocomplete="new-password" required>
+              <span class="hint">At least 8 characters with a letter and a number.</span>
+            </div>
+            <div class="field">
+              <label for="confirm">Confirm password</label>
+              <input class="input" id="confirm" name="confirm" type="password" maxlength="72" autocomplete="new-password" required>
+            </div>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn btn-primary" id="create-button">Create account</button></div>
+        </form>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
