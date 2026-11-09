@@ -6,16 +6,18 @@ Inter font, and one shared stylesheet so every screen looks the same.
 
 ## Running it
 
-Serve this folder with any static server and open `pages/login.html`, for example
-VS Code Live Server, or `python -m http.server 5500` in this folder and then
-http://localhost:5500/pages/login.html. The test accounts are listed on the login page.
+The backend serves these pages on its own port: start it and open http://localhost:8080.
+The test accounts are listed on the login page.
 
-`js/api.js` decides where the data comes from:
+`js/api.js` chooses where the data comes from by how the page was opened:
 
-| Setting | Use |
+| Opened from | Data |
 | --- | --- |
-| `USE_FAKE_DATA = false` | Calls the Spring Boot backend at `API_BASE_URL` (default `http://localhost:8080`) |
-| `USE_FAKE_DATA = true` | Runs every page on built in sample data that matches `seed.sql`, with no backend. Changes last until the tab is closed |
+| The backend (http://localhost:8080, or whatever port it runs on) | The API on the same address and the real database |
+| A separate file server (VS Code Live Server, `python -m http.server 5500`) or as a file | Built in sample data that matches `seed.sql`, with no backend. Changes last until the tab is closed |
+
+To choose yourself, set `window.WIL_USE_FAKE_DATA` and `window.WIL_API_BASE_URL` before
+`api.js` loads.
 
 ## Pages (`pages/`)
 

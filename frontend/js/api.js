@@ -4,17 +4,24 @@
    Pages only call the functions in window.API. They never write
    a URL themselves.
 
-   Every path below is served by the Spring Boot backend
-   (C2 to C7, brought together on fix/backend-integration).
+   Every path below is served by the Spring Boot backend (C2 to C7).
    ========================================================== */
 
-// true: every function returns the sample data at the bottom of this file.
-// false: every function calls the Spring Boot backend.
-// (A test page can set window.WIL_USE_FAKE_DATA before this file loads.)
-const USE_FAKE_DATA = window.WIL_USE_FAKE_DATA ?? true;
+// Where the pages were opened from decides where the data comes from:
+//   served by the backend (http://localhost:8080/pages/login.html): the API on the same
+//   address, with the real database. This is the normal way to run WIL Connect.
+//   opened from a separate file server (VS Code Live Server and similar) or as a file:
+//   the sample data at the bottom of this file, so pages can be designed without a backend.
+// A page or test can set window.WIL_USE_FAKE_DATA or window.WIL_API_BASE_URL before this
+// file loads to choose for itself.
+const DEV_SERVER_PORTS = ['3000', '5173', '5500', '5501', '5510', '8000'];
+const OPENED_ON_ITS_OWN = window.location.protocol === 'file:' || DEV_SERVER_PORTS.includes(window.location.port);
 
-// Address of the Spring Boot backend. Use '' when the pages are served by the backend itself.
-const API_BASE_URL = window.WIL_API_BASE_URL ?? 'http://localhost:8080';
+// Address of the backend. '' means the same address as the page.
+const API_BASE_URL = window.WIL_API_BASE_URL ?? (OPENED_ON_ITS_OWN ? 'http://localhost:8080' : '');
+
+// true: every function returns the sample data. false: every function calls the backend.
+const USE_FAKE_DATA = window.WIL_USE_FAKE_DATA ?? OPENED_ON_ITS_OWN;
 
 // Fixed values from Table 4.6.2 of the Phase 4 document.
 const RULES = {
@@ -152,7 +159,7 @@ async function request(path, options = {}) {
   try {
     response = await fetch(url, { method, headers, body: payload });
   } catch (error) {
-    throw new ApiError(`The server could not be reached. Check that the backend is running at ${API_BASE_URL}.`, 0);
+    throw new ApiError(`The server could not be reached. Check that the backend is running at ${API_BASE_URL || window.location.origin}.`, 0);
   }
 
   if (!response.ok) {

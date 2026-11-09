@@ -6,6 +6,8 @@ import wil_connect.support.ApiTest;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -84,5 +86,27 @@ class SecurityRulesTest extends ApiTest {
     @Test
     void unknownPathGives404NotA500() throws Exception {
         mvc.perform(get("/api/students/duty-logs/").with(JOHN)).andExpect(status().isNotFound());
+    }
+
+    // ---------- the web pages, served on the same port as the API ----------
+
+    @Test
+    void webPagesOpenWithoutALogin() throws Exception {
+        mvc.perform(get("/pages/login.html")).andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("<title>Log in")));
+        mvc.perform(get("/css/style.css")).andExpect(status().isOk());
+        mvc.perform(get("/js/api.js")).andExpect(status().isOk());
+        mvc.perform(get("/assets/favicon.svg")).andExpect(status().isOk());
+    }
+
+    @Test
+    void theAddressAloneOpensTheStartPage() throws Exception {
+        mvc.perform(get("/")).andExpect(status().isOk()).andExpect(forwardedUrl("index.html"));
+    }
+
+    @Test
+    void openPagesDoNotOpenTheApiOrTheUploads() throws Exception {
+        mvc.perform(get("/api/students/duty-logs")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/uploads/proof/2026-09-01_site_photo.jpg")).andExpect(status().isUnauthorized());
     }
 }

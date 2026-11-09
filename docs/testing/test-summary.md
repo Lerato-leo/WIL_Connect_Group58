@@ -1,6 +1,6 @@
 # Test summary
 
-**Result: 116 tests, 116 passed, 0 failed** (9 November 2026, `mvnw test` with JDK 17 against
+**Result: 119 tests, 119 passed, 0 failed** (9 November 2026, `mvnw test` with JDK 17 against
 MySQL loaded with `schema.sql` and `seed.sql`).
 
 The API tests call the real endpoints through Spring's MockMvc with the seed accounts and
@@ -14,7 +14,7 @@ when its transaction rolls back.
 | --- | --- | --- |
 | `AuthRegistrationTest` | 16 | Register saves the role row with the account (student, supervisor, employer); the PIN is stored as a hash; supervisors must pick an approved employer; role details are required; duplicate email or student number gives 409; weak passwords are refused; only a coordinator can create a coordinator; the sign up list shows approved employers only; login returns the name; wrong email and wrong password give the same message; 5 wrong passwords lock the login |
 | `AuthControllerTest` | 2 | Register and login through the API (team test, kept) |
-| `SecurityRulesTest` | 10 | Each role reaches only its own API; 401 is JSON without the browser login box; the frontend on localhost passes CORS and other sites do not; unknown paths give 404 |
+| `SecurityRulesTest` | 13 | Each role reaches only its own API; 401 is JSON without the browser login box; the frontend on localhost passes CORS and other sites do not; unknown paths give 404; the web pages are served on the same port without a login while the API and uploaded files stay protected |
 | `PlacementApiTest` | 9 | Employer search returns status text (was a 500); requests notify the employer; status filter; accept creates an active placement and tells the student; the meeting message reaches the student; reject; another employer cannot answer; placements for students and employers (were empty) |
 | `PlacementRequestServiceTest` | 5 | Placement request rules in the service (team test, kept) |
 | `DutyLogControllerTest` | 25 | Hours 0.5 to 12; task 10 to 1000; skills optional and up to 500; plain message for non numbers; no future dates; inside the placement; one log per day; no active placement; at most 3 files; only JPG, PNG or PDF; renamed files refused by content; 5 MB limit; safe file names; rejected logs can be corrected; signed logs within 24 hours can be corrected and lock after; a correction cannot move onto another day; 3 files across corrections; students cannot touch other logs; My Logs order and fields; who may read placement logs and proof files; missing files give a plain message |

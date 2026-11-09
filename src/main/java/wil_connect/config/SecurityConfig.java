@@ -60,6 +60,10 @@ public class SecurityConfig {
                                 "/openapi/**",
                                 // Spring's error page, so a real error is not hidden behind a 401
                                 "/error").permitAll()
+                        // The web pages themselves; each page asks for a login before it shows data.
+                        .requestMatchers(HttpMethod.GET,
+                                "/", "/index.html", "/favicon.ico",
+                                "/pages/**", "/css/**", "/js/**", "/assets/**").permitAll()
                         .requestMatchers("/api/students/**").hasRole("STUDENT")
                         .requestMatchers("/api/supervisors/**").hasRole("SUPERVISOR")
                         .requestMatchers("/api/employers/**").hasRole("EMPLOYER")
