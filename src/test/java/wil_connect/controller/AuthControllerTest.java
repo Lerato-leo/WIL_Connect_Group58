@@ -2,6 +2,10 @@ package wil_connect.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuthControllerTest {
 
     @Autowired
@@ -31,19 +36,17 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // Rolled back after the test, so it can run again on the same database.
     @Test
-    @Transactional
+    @Order(1)
     void shouldRegisterStudentSuccessfully() throws Exception {
+        userAccountRepository.findByEmail("teststudent2@wilconnect.co.za")
+                .ifPresent(userAccountRepository::delete);
 
         String requestBody = """
                 {
                     "email": "teststudent2@wilconnect.co.za",
-                    "password": "password1",
-                    "role": "STUDENT",
-                    "firstName": "Test",
-                    "lastName": "Student",
-                    "studentNumber": "20249999"
+                    "password": "password",
+                    "role": "STUDENT"
                 }
                 """;
 
@@ -59,15 +62,16 @@ class AuthControllerTest {
         assertEquals("teststudent2@wilconnect.co.za", user.getEmail());
         assertEquals("STUDENT", user.getRole().name());
 
-        assertTrue(passwordEncoder.matches("password1", user.getPassword()));
+        assertTrue(passwordEncoder.matches("password", user.getPassword()));
     }
 
     // TEST 2: Successful login
     @Test
+    @Order(2)
     void shouldLoginStudentSuccessfully() throws Exception {
         String requestBody = """
                 {
-                    "email": "sarah.jones@richfield.co.za",
+                    "email": "teststudent2@wilconnect.co.za",
                     "password": "password"
                 }
                 """;
@@ -75,7 +79,7 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(requestBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").isNumber())
-                .andExpect(jsonPath("$.email").value("sarah.jones@richfield.co.za"))
+                .andExpect(jsonPath("$.email").value("teststudent2@wilconnect.co.za"))
                 .andExpect(jsonPath("$.role").value("STUDENT"))
                 .andExpect(jsonPath("$.authenticated").value(true))
                 .andExpect(jsonPath("$.message").value("Login successful"));
