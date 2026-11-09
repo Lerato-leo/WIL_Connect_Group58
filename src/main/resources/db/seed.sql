@@ -86,8 +86,8 @@ INSERT INTO DUTY_LOG (log_id, placement_id, log_date, task_description, skills_l
 (10,1,'2026-10-22','Reviewed code changes with the team lead','Code review and team collaboration',8.00,'Signed',NULL),
 (11,1,'2026-10-23','Wrote 10 new test cases','Test coverage and regression planning',8.00,'Signed',NULL),
 (12,1,'2026-10-27','Fixed errors found in system testing','System testing and bug fixing',8.00,'Signed',NULL),
-(13,1,'2026-10-28','Attended the weekly project stand-up','Agile ceremonies and progress reporting',8.00,'Rejected','Please attach the timesheet as proof for this day.'),
-(14,1,'2026-10-29','Updated the customer database schema, wrote 12 test queries and attended the team stand-up meeting.','Schema migration and SQL testing',7.50,'Pending',NULL);
+(13,1,'2026-10-28','Attended the weekly project stand up','Agile ceremonies and progress reporting',8.00,'Rejected','Please attach the timesheet as proof for this day.'),
+(14,1,'2026-10-29','Updated the customer database schema, wrote 12 test queries and attended the team stand up meeting.','Schema migration and SQL testing',7.50,'Pending',NULL);
 
 -- ------------------------------------------------------------
 -- PROOF_OF_WORK
@@ -122,8 +122,8 @@ INSERT INTO SIGN_OFF (log_id, supervisor_id, signoff_date, verification_method, 
 -- ------------------------------------------------------------
 INSERT INTO NOTIFICATION (user_id, message, is_read, created_at) VALUES
 (4,'A new log from John Smith needs sign off.',FALSE,'2026-10-29 17:22:00'),
-(2,'Your log for 2026-10-27 was signed off.',TRUE,'2026-10-28 08:30:00'),
-(2,'Your log for 2026-10-28 was rejected: Please attach the timesheet as proof for this day.',FALSE,'2026-10-28 09:15:00'),
+(2,'Your log for 27 October 2026 was signed off.',TRUE,'2026-10-28 08:30:00'),
+(2,'Your log for 28 October 2026 was rejected: Please attach the timesheet as proof for this day.',FALSE,'2026-10-28 09:15:00'),
 (6,'New placement request from Sarah Jones.',FALSE,'2026-10-20 11:05:00');
 
 -- Restore the safer default for this session

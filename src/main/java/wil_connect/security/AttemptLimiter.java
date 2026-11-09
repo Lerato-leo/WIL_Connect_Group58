@@ -40,7 +40,8 @@ public class AttemptLimiter {
     public void checkNotLocked(String key, String what) {
         Entry entry = entries.get(key);
         if (entry != null && entry.lockedUntil() != null && clock.instant().isBefore(entry.lockedUntil())) {
-            long minutes = Duration.between(clock.instant(), entry.lockedUntil()).toMinutes() + 1;
+            long seconds = Duration.between(clock.instant(), entry.lockedUntil()).getSeconds();
+            long minutes = Math.max(1, (seconds + 59) / 60); // rounded up: "15 more minutes" right after locking
             throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
                     "Too many wrong attempts. Your " + what + " is locked for " + minutes + " more minutes.");
         }

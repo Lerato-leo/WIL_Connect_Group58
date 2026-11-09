@@ -112,7 +112,7 @@ public class DutyLogViews {
     }
 
     /** The name the student uploaded: the stored name without its date and random prefix. */
-    static String fileName(String filePath) {
+    public static String fileName(String filePath) {
         String name = Paths.get(filePath).getFileName().toString();
         return name.replaceFirst("^\\d{4}-\\d{2}-\\d{2}_", "").replaceFirst("^[0-9a-f]{8}_", "");
     }

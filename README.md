@@ -126,17 +126,25 @@ The active placement is:
 
 ## Proof files
 
-Before testing the report screen or proof-of-work links, the team must create
-the following folder in the application project:
+Uploaded proof of work is saved in `uploads/proof/` (ignored by git). The seed rows
+point at five files that are not in the repository, so on start up the backend
+creates a labelled sample file for each one that is missing. Real uploads are never
+touched. Turn this off with `wil.upload.create-missing-samples=false`.
 
-uploads/proof/
+## Running the tests
 
-Add placeholder files using these exact names:
-2026-09-01_site_photo.jpg
-2026-09-07_timesheet.pdf
-2026-10-27_test_report.pdf
-2026-10-29_site_photo.jpg
-2026-10-29_timesheet.pdf
+The tests run against MySQL, so load `schema.sql` and `seed.sql` first. Every test
+is rolled back, so the seed data stays the same and the tests can run again.
+
+```
+mvnw test
+```
+
+To use another database or password without editing `application.properties`:
+
+```
+SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/wil_connect SPRING_DATASOURCE_PASSWORD=yourpassword mvnw test
+```
 
 ## Project structure
 
