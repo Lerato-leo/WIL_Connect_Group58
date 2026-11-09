@@ -12,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BindException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,16 +26,38 @@ public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException exception) {
+    /**
+     * Covers JSON bodies and form fields (MethodArgumentNotValidException is a BindException).
+     * Messages written for the screens start with a capital and are shown as they are;
+     * the default ones ("must not be null") get the field name in front.
+     */
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ErrorResponse> handleValidationErrors(BindException exception) {
         String message = exception.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .map(error -> {
+                    if (error.isBindingFailure()) {
+                        return "Some of the details are not valid. Check the form and try again.";
+                    }
+                    String text = String.valueOf(error.getDefaultMessage());
+                    return !text.isEmpty() && Character.isUpperCase(text.charAt(0))
+                            ? text : error.getField() + ": " + text;
+                })
                 .findFirst()
                 .orElse("Invalid request");
 
         return buildResponse(HttpStatus.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUnknownPath(NoResourceFoundException exception) {
+        return buildResponse(HttpStatus.NOT_FOUND, "This item could not be found.");
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleUploadTooLarge(MaxUploadSizeExceededException exception) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Each file must be 5 MB or smaller");
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

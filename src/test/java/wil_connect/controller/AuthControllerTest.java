@@ -31,14 +31,19 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    // Rolled back after the test, so it can run again on the same database.
     @Test
+    @Transactional
     void shouldRegisterStudentSuccessfully() throws Exception {
 
         String requestBody = """
                 {
                     "email": "teststudent2@wilconnect.co.za",
-                    "password": "password",
-                    "role": "STUDENT"
+                    "password": "password1",
+                    "role": "STUDENT",
+                    "firstName": "Test",
+                    "lastName": "Student",
+                    "studentNumber": "20249999"
                 }
                 """;
 
@@ -54,7 +59,7 @@ class AuthControllerTest {
         assertEquals("teststudent2@wilconnect.co.za", user.getEmail());
         assertEquals("STUDENT", user.getRole().name());
 
-        assertTrue(passwordEncoder.matches("password", user.getPassword()));
+        assertTrue(passwordEncoder.matches("password1", user.getPassword()));
     }
 
     // TEST 2: Successful login

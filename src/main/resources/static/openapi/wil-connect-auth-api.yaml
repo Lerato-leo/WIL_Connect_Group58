@@ -132,6 +132,49 @@ components:
             - COORDINATOR
           example: STUDENT
 
+        # The details of the role (4.6.2). The fields the role needs are required.
+        firstName:
+          type: string
+          maxLength: 50
+          example: John
+        lastName:
+          type: string
+          maxLength: 50
+          example: Smith
+        studentNumber:
+          type: string
+          maxLength: 20
+          example: "20240123"
+        employerId:
+          type: integer
+          format: int32
+          example: 1
+        phone:
+          type: string
+          maxLength: 20
+          example: "0821234567"
+        pin:
+          type: string
+          format: password
+          example: "1234"
+        employerName:
+          type: string
+          maxLength: 100
+          example: Nexus Tech Solutions
+        address:
+          type: string
+          maxLength: 255
+          example: 12 Rivonia Road, Sandton
+        contactEmail:
+          type: string
+          format: email
+          maxLength: 100
+          example: hr@nexustech.co.za
+        contactNumber:
+          type: string
+          maxLength: 20
+          example: "0115550100"
+
     RegisterResponse:
       type: object
       required:
@@ -216,6 +259,11 @@ components:
         message:
           type: string
           example: Login successful
+
+        name:
+          type: string
+          description: The person's full name, or the company name for an employer
+          example: John Smith
 
 
     # ========================================================
