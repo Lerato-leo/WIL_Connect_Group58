@@ -1,4 +1,3 @@
-
 package wil_connect.service;
 
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 import wil_connect.entity.*;
 import wil_connect.enums.EStatus;
 import wil_connect.repository.*;
-
 import wil_connect.generated.placement.model.MeetingRequest;
 import wil_connect.generated.placement.model.AcceptPlacementRequest;
 import wil_connect.validation.ErrorMessages;
@@ -28,38 +26,50 @@ public class PlacementRequestService {
     private final StudentRepository studentRepository;
     private final EmployerRepository employerRepository;
     private final SupervisorRepository supervisorRepository;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public List<Employer> searchEmployers(String keyword) {
-
         if (keyword == null || keyword.isBlank()) {
             return employerRepository.findByStatusIgnoreCase(EStatus.APPROVED.getValue());
         }
-        return employerRepository.findByEmployerNameContainingIgnoreCaseAndStatusIgnoreCase(keyword.trim(), EStatus.APPROVED.getValue());
+
+        return employerRepository.findByEmployerNameContainingIgnoreCaseAndStatusIgnoreCase(
+                keyword.trim(), EStatus.APPROVED.getValue());
     }
 
     @Transactional
     public PlacementRequest createRequest(Long authenticatedUserId, Integer employerId) {
         Student student = studentRepository.findByUserAccount_UserId(authenticatedUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.STUDENT_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, ErrorMessages.STUDENT_NOT_FOUND));
 
         Employer employer = employerRepository.findById(employerId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.EMPLOYER_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, ErrorMessages.EMPLOYER_NOT_FOUND));
 
         ValidateStudentRequest(employerId, employer, student);
+
         PlacementRequest request = new PlacementRequest();
         request.setStudent(student);
         request.setEmployer(employer);
         request.setRequestDate(LocalDate.now());
         request.setStatus(EStatus.PENDING.getValue());
 
-        return requestRepository.save(request);
+        PlacementRequest savedRequest = requestRepository.save(request);
+        // Table 4.7.14
+        notificationService.sendNotification(
+                employer.getUserAccount().getUserId().intValue(),
+                "New placement request from " + student.getFirstName() + " " + student.getLastName() + ".");
+        return savedRequest;
     }
 
     @Transactional
-    public Placement acceptRequest(Integer requestId, Long authenticatedUserId, AcceptPlacementRequest details) {
+    public Placement acceptRequest(Integer requestId, Long authenticatedUserId,
+                                   AcceptPlacementRequest details) {
         PlacementRequest request = getEmployerRequest(requestId, authenticatedUserId);
         Supervisor supervisor = validateSupervisor(details, request);
+
         Placement placement = new Placement();
         placement.setStudent(request.getStudent());
         placement.setEmployer(request.getEmployer());
@@ -70,38 +80,47 @@ public class PlacementRequestService {
         request.setStatus(EStatus.ACCEPTED.getValue());
 
         requestRepository.save(request);
-        return placementRepository.save(placement);
+        Placement savedPlacement = placementRepository.save(placement);
+        notifyStudentOfDecision(request);
+        return savedPlacement;
     }
 
-
-
-    // Employer rejects a request
     @Transactional
     public PlacementRequest rejectRequest(Integer requestId, Long authenticatedUserId) {
         PlacementRequest request = getEmployerRequest(requestId, authenticatedUserId);
-        if (!EStatus.PENDING.getValue().equals(request.getStatus()) && !EStatus.MEETING_REQUESTED.getValue().equals(request.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ErrorMessages.REQUEST_ALREADY_PROCESSED);
+        if (!EStatus.PENDING.getValue().equals(request.getStatus())
+                && !EStatus.MEETING_REQUESTED.getValue().equals(request.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, ErrorMessages.REQUEST_ALREADY_PROCESSED);
         }
+
         request.setStatus(EStatus.REJECTED.getValue());
-        return requestRepository.save(request);
+        PlacementRequest savedRequest = requestRepository.save(request);
+        notifyStudentOfDecision(savedRequest);
+        return savedRequest;
     }
 
-
     @Transactional
-    public PlacementRequest requestMeeting(Integer requestId, Long authenticatedUserId, MeetingRequest details) {
+    public PlacementRequest requestMeeting(Integer requestId, Long authenticatedUserId,
+                                           MeetingRequest details) {
         PlacementRequest request = getEmployerRequest(requestId, authenticatedUserId);
         if (!EStatus.PENDING.getValue().equals(request.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ErrorMessages.MEETING_NOT_ALLOWED
-            );
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, ErrorMessages.MEETING_NOT_ALLOWED);
         }
 
         if (details == null || details.getMessage() == null || details.getMessage().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ErrorMessages.MEETING_MESSAGE_REQUIRED);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, ErrorMessages.MEETING_MESSAGE_REQUIRED);
         }
 
-        // Update placement request status
         request.setStatus(EStatus.MEETING_REQUESTED.getValue());
-        return requestRepository.save(request);
+        PlacementRequest savedRequest = requestRepository.save(request);
+        // The employer's message goes to the student with the new status.
+        notificationService.sendNotification(
+                savedRequest.getStudent().getUserAccount().getUserId().intValue(),
+                "Your placement request was updated: Meeting Requested. " + details.getMessage().trim());
+        return savedRequest;
     }
 
     /**
@@ -113,7 +132,8 @@ public class PlacementRequestService {
     @Transactional(readOnly = true)
     public List<PlacementRequest> getMyPlacementRequests(Long authenticatedUserId) {
         studentRepository.findByUserAccount_UserId(authenticatedUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.STUDENT_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, ErrorMessages.STUDENT_NOT_FOUND));
 
         return requestRepository.findByStudent_UserAccount_UserId(authenticatedUserId);
     }
@@ -127,72 +147,115 @@ public class PlacementRequestService {
      * @return List of the employer's placement requests
      */
     @Transactional(readOnly = true)
-    public List<PlacementRequest> getEmployerPlacementRequests(Long authenticatedUserId, String status) {
-
+    public List<PlacementRequest> getEmployerPlacementRequests(
+            Long authenticatedUserId, String status) {
         employerRepository.findByUserAccount_UserId(authenticatedUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.EMPLOYER_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, ErrorMessages.EMPLOYER_NOT_FOUND));
 
-        List<PlacementRequest> requests = requestRepository.findByEmployer_UserAccount_UserId(authenticatedUserId);
+        List<PlacementRequest> requests =
+                requestRepository.findByEmployer_UserAccount_UserId(authenticatedUserId);
         if (status == null || status.isBlank()) {
             return requests;
         }
 
         String requestedStatus = status.trim();
         return requests.stream()
-                .filter(request -> request.getStatus() != null && request.getStatus().equalsIgnoreCase(requestedStatus))
+                .filter(request -> request.getStatus() != null
+                        && request.getStatus().equalsIgnoreCase(requestedStatus))
                 .toList();
     }
 
+    private void notifyStudentOfDecision(PlacementRequest request) {
+        notificationService.sendNotification(
+                request.getStudent().getUserAccount().getUserId().intValue(),
+                "Your placement request was updated: " + request.getStatus() + ".");
+    }
 
     private PlacementRequest getEmployerRequest(Integer requestId, Long authenticatedUserId) {
         PlacementRequest request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.REQUEST_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, ErrorMessages.REQUEST_NOT_FOUND));
 
         Employer employer = employerRepository.findByUserAccount_UserId(authenticatedUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.EMPLOYER_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, ErrorMessages.EMPLOYER_NOT_FOUND));
 
         if (!request.getEmployer().getEmployerId().equals(employer.getEmployerId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, ErrorMessages.UNAUTHORIZED_EMPLOYER_REQUEST);
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, ErrorMessages.UNAUTHORIZED_EMPLOYER_REQUEST);
         }
+
         return request;
     }
 
-    private void ValidateStudentRequest (Integer employerId, Employer employer, Student student) {
+    private void ValidateStudentRequest(Integer employerId, Employer employer, Student student) {
         if (!EStatus.APPROVED.getValue().equalsIgnoreCase(employer.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ErrorMessages.EMPLOYER_NOT_APPROVED);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, ErrorMessages.EMPLOYER_NOT_APPROVED);
         }
-        List<String> activeRequestStatuses = List.of(EStatus.PENDING.getValue(), EStatus.MEETING_REQUESTED.getValue());
-        boolean isActiveRequest = requestRepository.existsByStudent_StudentIdAndEmployer_EmployerIdAndStatusIn(student.getStudentId(), employerId, activeRequestStatuses);
+
+        List<String> activeRequestStatuses = List.of(
+                EStatus.PENDING.getValue(), EStatus.MEETING_REQUESTED.getValue());
+        boolean isActiveRequest =
+                requestRepository.existsByStudent_StudentIdAndEmployer_EmployerIdAndStatusIn(
+                        student.getStudentId(), employerId, activeRequestStatuses);
+
         if (isActiveRequest) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ErrorMessages.DUPLICATE_REQUEST);
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, ErrorMessages.DUPLICATE_REQUEST);
         }
-        boolean isActivePlacement = placementRepository.existsByStudent_StudentIdAndEmployer_EmployerIdAndStatus(student.getStudentId(), employerId, EStatus.ACTIVE.getValue());
+
+        boolean isActivePlacement =
+                placementRepository.existsByStudent_StudentIdAndEmployer_EmployerIdAndStatus(
+                        student.getStudentId(), employerId, EStatus.ACTIVE.getValue());
+
         if (isActivePlacement) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ErrorMessages.ACTIVE_PLACEMENT_EXISTS);
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, ErrorMessages.ACTIVE_PLACEMENT_EXISTS);
         }
     }
 
-    private Supervisor validateSupervisor (AcceptPlacementRequest details, PlacementRequest request) {
-        if (!EStatus.PENDING.getValue().equals(request.getStatus()) && !EStatus.MEETING_REQUESTED.getValue().equals(request.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ErrorMessages.REQUEST_ALREADY_PROCESSED);
+    private Supervisor validateSupervisor(AcceptPlacementRequest details, PlacementRequest request) {
+        if (!EStatus.PENDING.getValue().equals(request.getStatus())
+                && !EStatus.MEETING_REQUESTED.getValue().equals(request.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, ErrorMessages.REQUEST_ALREADY_PROCESSED);
         }
-        if (details == null || details.getSupervisorId() == null || details.getStartDate() == null || details.getEndDate() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ErrorMessages.REQUIRED_ACCEPTANCE_DETAILS);
-        }
-        if (details.getEndDate().isBefore(details.getStartDate())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ErrorMessages.INVALID_DATE_RANGE);
-        }
-        Supervisor supervisor = supervisorRepository.findById(details.getSupervisorId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.SUPERVISOR_NOT_FOUND));
 
-        if (supervisor.getEmployer() == null || !supervisor.getEmployer().getEmployerId().equals(request.getEmployer().getEmployerId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ErrorMessages.SUPERVISOR_EMPLOYER_MISMATCH);
+        if (details == null || details.getSupervisorId() == null
+                || details.getStartDate() == null || details.getEndDate() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, ErrorMessages.REQUIRED_ACCEPTANCE_DETAILS);
         }
-        boolean isaActivePlacementWithEmployer = placementRepository
-                .existsByStudent_StudentIdAndEmployer_EmployerIdAndStatus(request.getStudent().getStudentId(), request.getEmployer().getEmployerId(), EStatus.ACTIVE.getValue());
-        if (isaActivePlacementWithEmployer) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ErrorMessages.ACTIVE_PLACEMENT_EXISTS);
+
+        if (details.getEndDate().isBefore(details.getStartDate())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, ErrorMessages.INVALID_DATE_RANGE);
         }
+
+        Supervisor supervisor = supervisorRepository.findById(details.getSupervisorId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, ErrorMessages.SUPERVISOR_NOT_FOUND));
+
+        if (supervisor.getEmployer() == null
+                || !supervisor.getEmployer().getEmployerId()
+                .equals(request.getEmployer().getEmployerId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, ErrorMessages.SUPERVISOR_EMPLOYER_MISMATCH);
+        }
+
+        boolean isActivePlacementWithEmployer =
+                placementRepository.existsByStudent_StudentIdAndEmployer_EmployerIdAndStatus(
+                        request.getStudent().getStudentId(),
+                        request.getEmployer().getEmployerId(),
+                        EStatus.ACTIVE.getValue());
+
+        if (isActivePlacementWithEmployer) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, ErrorMessages.ACTIVE_PLACEMENT_EXISTS);
+        }
+
         return supervisor;
     }
 }

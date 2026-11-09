@@ -169,7 +169,7 @@ public class PlacementRequestController implements StudentPlacementRequestsApi, 
         response.setEmployerId(request.getEmployer().getEmployerId());
         response.setEmployerName(request.getEmployer().getEmployerName());
         response.setRequestDate(request.getRequestDate());
-        response.setStatus(PlacementRequestResponse.StatusEnum.valueOf(request.getStatus()));
+        response.setStatus(PlacementRequestResponse.StatusEnum.fromValue(request.getStatus()));
         return response;
     }
 
@@ -186,7 +186,7 @@ public class PlacementRequestController implements StudentPlacementRequestsApi, 
         response.setEmployerId(request.getEmployer().getEmployerId());
         response.setEmployerName(request.getEmployer().getEmployerName());
         response.setRequestDate(request.getRequestDate());
-        response.setStatus(EmployerPlacementRequestResponse.StatusEnum.valueOf(request.getStatus()));
+        response.setStatus(EmployerPlacementRequestResponse.StatusEnum.fromValue(request.getStatus()));
 
         response.setStudentId(request.getStudent().getStudentId());
         response.setStudentNumber(request.getStudent().getStudentNumber());
@@ -203,18 +203,6 @@ public class PlacementRequestController implements StudentPlacementRequestsApi, 
      * @return placement response
      */
     private PlacementResponse toPlacementResponse(Placement placement) {
-        PlacementResponse response = new PlacementResponse();
-        response.setPlacementId(placement.getPlacementId());
-        response.setStudentId(placement.getStudent().getStudentId());
-        response.setStudentName(placement.getStudent().getFirstName() + " " + placement.getStudent().getLastName());
-        response.setStudentNumber(placement.getStudent().getStudentNumber());
-        response.setEmployerId(placement.getEmployer().getEmployerId());
-        response.setEmployerName(placement.getEmployer().getEmployerName());
-        response.setSupervisorId(placement.getSupervisor().getSupervisorId());
-        response.setSupervisorName(placement.getSupervisor().getFirstName() + " " + placement.getSupervisor().getLastName());
-        response.setStartDate(placement.getStartDate());
-        response.setEndDate(placement.getEndDate());
-        response.setStatus(PlacementResponse.StatusEnum.valueOf(placement.getStatus()));
-        return response;
+        return PlacementController.toResponse(placement);
     }
 }
